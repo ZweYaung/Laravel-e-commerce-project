@@ -1,0 +1,36 @@
+/* rating */
+
+.rating-css div{
+    color:#8C907E;
+    font-size: 10px;
+    font-family: sans-serif;
+    font-style: 800;
+    text-align: start;
+    text-transform: uppercase;
+    padding: 20px 0;
+}
+
+.rating-css input{
+    display: none;
+}
+
+.rating-css input + label{
+    font-size: 20px;
+    text-shadow: 1px 1px #8C907E;
+    cursor: pointer
+}
+
+.rating-css input:checked + label ~ label{
+    color: white;
+    border: #8C907E
+}
+
+.rating-css label:active{
+    transform:scale(0.8);
+    transition:0.3s ease;
+}
+
+/* end of star rating */
+.checked{
+    color: #8C907E;
+}

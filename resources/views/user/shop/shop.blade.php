@@ -1,0 +1,174 @@
+@extends('user.layouts.master')
+
+@section('content')
+    <section id="billboard" class="bg-light py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <h1 class="section-title text-center mt-4" data-aos="fade-up">
+                    SHOP
+                </h1>
+                <div class="col-md-6 text-center" data-aos="fade-up" data-aos-delay="300">
+                    <p>BROWSE AS YOU WANT, BUY AS YOU WISH</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid pt-5">
+        <div class="row d-flex justify-content-end align-items-center p-3">
+            <div class="col-auto">
+                @if (session('addToCart'))
+                    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                {{ session('addToCart') }}
+                            </div>
+                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+        <div class="row px-xl-5 d-flex justify-content-center">
+            <!-- Shop Product Start -->
+            <div class="col-12">
+                <div class="row pb-3">
+                    <div class="col-12 pb-1">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <form action="{{ route('user#shop') }}" method="get" class="d-flex align-items-center"
+                                role="search">
+                                <a href="{{ route('user#shop') }}" class="btn"><i
+                                        class="fa-solid fa-arrows-rotate align-middle"></i></a>
+                                <input class="form-control me-2" value="{{ request('searchKey') }}" name="searchKey"
+                                    type="search" placeholder="Search" aria-label="Search" />
+                                <button class="btn btn-outline-dark rounded" type="submit">
+                                    Search
+                                </button>
+                            </form>
+
+                            <li class="dropdown">
+                                <a class="dropdown-toggle btn" href="#" id="dropdownHome" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+
+                                    {{-- display selected sorting --}}
+                                    @php
+                                        $sortText = 'Sort by';
+                                        if ($action == 'oldest') {
+                                            $sortText = 'Oldest';
+                                        } elseif ($action == 'bestRating') {
+                                            $sortText = 'Best Rating';
+                                        } elseif ($action == 'priceLowToHigh') {
+                                            $sortText = 'Price: Low to High';
+                                        } elseif ($action == 'priceHighToLow') {
+                                            $sortText = 'Price: High to Low';
+                                        }
+                                    @endphp
+
+                                    {{ $sortText }}
+                                </a>
+                                <ul class="dropdown-menu list-unstyled" aria-labelledby="dropdownHome">
+                                    <li>
+                                        <a href="{{ route('user#shop') }}" class="dropdown-item item-anchor">Default -
+                                            Latest</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user#shop', 'oldest') }}"
+                                            class="dropdown-item item-anchor">Oldest</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user#shop', 'priceLowToHigh') }}"
+                                            class="dropdown-item item-anchor">Price: Low to High</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user#shop', 'priceHighToLow') }}"
+                                            class="dropdown-item item-anchor">Price: High to Low</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                        </div>
+                    </div>
+
+                    @if (count($products) != 0)
+                        @foreach ($products as $item)
+                            <div class="col-lg-3 col-md-6 col-sm-12 pb-1 mb-5">
+                                <div class="card product-item border-0 mb-4 image-zoom-effect d-flex flex-column h-100">
+                                    <!-- Image -->
+                                    <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0"
+                                        style="height: 400px;">
+                                        <a href="{{ route('shop#productDetails', $item->id) }}">
+                                            <img class="img-fluid w-100 h-100"
+                                                src="{{ asset('productImage/' . $item->image) }}"
+                                                alt="{{ $item->name }}" style="object-fit: cover;">
+                                        </a>
+
+                                        @php
+                                            $isInWishlist = $wishlistItems->firstWhere('product_id', $item->id);
+                                        @endphp
+
+
+                                        @if ($isInWishlist)
+                                            <a href="{{ route('wishlist#remove', $isInWishlist->id) }}"
+                                                title="Remove from Wishlist" class="btn-icon btn-wishlist"><i
+                                                    class="fa-solid fa-heart"></i></a>
+                                        @else
+                                            <a href="{{ route('wishlist#add', $item->id) }}" title="Add to Wishlist"
+                                                class="btn-icon btn-wishlist">
+                                                <i class="fa-regular fa-heart"></i>
+                                            </a>
+                                        @endif
+
+                                    </div>
+
+                                    <div class="card-body border-left border-right text-center p-2">
+                                        <h6 class="mb-2" style="white-space: normal; word-wrap: break-word;">
+                                            {{ $item->name }}
+                                        </h6>
+                                        <div class="d-flex justify-content-center">
+                                            <h6 class="m-0">{{ number_format($item->price) }} MMK</h6>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer d-flex justify-content-center bg-light border mt-auto">
+                                        <form action="{{ route('user#addToCart') }}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="userId" value="{{ Auth::user()->id }}">
+                                            <input type="hidden" name="productId" value="{{ $item->id }}">
+                                            <input type="hidden" name="qty" value="1">
+                                            <button type="submit" class="btn btn-sm text-dark p-0">
+                                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="7">
+                                <h5 class="text-muted text-center">Found nothing!</h5>
+                            </td>
+                        </tr>
+                    @endif
+                    <span class="d-flex justify-content-center">{{ $products->links() }}</span>
+                </div>
+            </div>
+            <!-- Shop Product End -->
+        </div>
+    </div>
+@endsection
+
+@section('js-script')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function(toastEl) {
+                var toast = new bootstrap.Toast(toastEl, {
+                    delay: 3000
+                });
+                toast.show();
+            });
+        });
+    </script>
+@endsection
