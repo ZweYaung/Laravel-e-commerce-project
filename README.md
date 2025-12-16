@@ -70,7 +70,7 @@ npm install
 ```bash
 cp .env.example .env
 ```
-5.Generate the application key
+5. Generate the application key
 ```bash
 php artisan key:generate
 ```
