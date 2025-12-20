@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (env('APP_ENV') === 'production') {
+        URL::forceScheme('https');
+        }
+
         Paginator::useBootstrap();
 
         // Share wishlist and cart data with all views
