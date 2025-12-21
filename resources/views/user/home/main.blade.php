@@ -31,7 +31,7 @@
                                         </a>
                                     </div>
 
-                                    <div class="banner-content py-4">
+                                    <div class="banner-content py-4 px-2 px-sm-3 px-md-0">
                                         <h5 class="element-title text-uppercase">
                                             <a href="{{ route('shop#productDetails', $item->id) }}"
                                                 class="item-anchor">{{ $item->name }}</a>
@@ -60,9 +60,8 @@
                     style="width: 100px; height: 100px;">
                     <i class="fa-solid fa-arrow-right"></i>
                 </div>
-
-
             </div>
+
         </div>
     </section>
 

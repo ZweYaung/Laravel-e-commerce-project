@@ -63,7 +63,7 @@
                             <hr />
 
                             <div class="text-center">
-                                <a class="small btn-link" href="{{ route('login') }}">
+                                <a class="small d-inline-block text-decoration-underline" href="{{ route('login') }}">
                                     Already have an account? Login
                                 </a>
                             </div>

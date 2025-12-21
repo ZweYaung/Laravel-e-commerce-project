@@ -56,10 +56,12 @@
 
                                     <hr />
                                     <div class="text-center">
-                                        <a class="small btn-link" href="{{ route('register') }}">
+                                        <a class="small d-inline-block text-decoration-underline"
+                                            href="{{ route('register') }}">
                                             Don't have an account? Register
                                         </a>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
