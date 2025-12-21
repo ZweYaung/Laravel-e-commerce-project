@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Trust all proxies (temporary)
+    Request::setTrustedProxies(['*'], Request::HEADER_X_FORWARDED_ALL);
+
         if (env('APP_ENV') === 'production') {
         URL::forceScheme('https');
         }
