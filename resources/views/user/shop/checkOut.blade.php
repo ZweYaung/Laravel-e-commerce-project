@@ -16,8 +16,8 @@
                 <a href="{{ route('user#cart') }}" class="btn-link fs-5 text-dark">Back</a>
             </div>
         </div>
-        <div class="row px-xl-5 flex-column">
-            <div class="col-12 mb-3">
+        <div class="row px-xl-5 flex-column flex-md-row">
+            <div class="col-12 col-md-4 mb-3 mb-md-0">
                 <h5 class="mb-4">Payment methods</h5>
                 @foreach ($paymentAcc as $item)
                     <div><b>{{ $item->type }}</b> ( Name : {{ $item->account_name }})</div>
@@ -25,7 +25,7 @@
                     <hr />
                 @endforeach
             </div>
-            <div class="col-12">
+            <div class="col-12 col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-header">Payment Information</div>
                     <div class="card-body">
