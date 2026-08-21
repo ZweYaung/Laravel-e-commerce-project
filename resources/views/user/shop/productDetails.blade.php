@@ -10,33 +10,7 @@
             </div>
 
             <div class="col-auto">
-                @if (session('comment'))
-                    <div style="height: 60px; width: 400px" class="alert alert-success alert-dismissible fade show me-5"
-                        role="alert">
-                        <small class="mb-5">{{ session('comment') }}</small>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                        </button>
-                    </div>
-                @endif
-                @if (session('rate'))
-                    <div style="height: 60px; width: 400px" class="alert alert-success alert-dismissible fade show me-5"
-                        role="alert">
-                        <small class="mb-5">{{ session('rate') }}</small>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                        </button>
-                    </div>
-                @endif
-                @if (session('addToCart'))
-                    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                {{ session('addToCart') }}
-                            </div>
-                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                        </div>
-                    </div>
-                @endif
+                <!-- Toast messages handled by JS -->
             </div>
         </div>
 
@@ -63,9 +37,6 @@
                             <i class="far fa-star"></i>
                         @endfor
 
-                        {{-- <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                        <i class="far fa-star"></i> --}}
                     </div>
                     <small class="pt-1">
                         ({{ count($comments) > 0 ? count($comments) : 0 }} Reviews)
@@ -74,17 +45,15 @@
                 </div>
                 <h3 class="font-weight-semi-bold mb-4">{{ number_format($product->price) }} MMK</h3>
 
-                <form action="{{ route('user#addToCart') }}" method="post">
-                    @csrf
-                    <input type="hidden" name="userId" value="{{ Auth::user()->id }}">
-                    <input type="hidden" name="productId" value="{{ $product->id }}">
-                    <div class="input-group quantity mb-5" style="width: 100px">
+                <!-- Add to Cart Form with AJAX -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="input-group quantity" style="width: 100px">
                         <div class="input-group-btn">
                             <button type="button" class="btn btn-sm btn-minus rounded-circle bg-light border">
                                 <i class="fa fa-minus"></i>
                             </button>
                         </div>
-                        <input type="text" name="qty" class="form-control form-control-sm text-center border-0"
+                        <input type="text" id="product-qty" class="form-control form-control-sm text-center border-0"
                             value="1" />
                         <div class="input-group-btn">
                             <button type="button" class="btn btn-sm btn-plus rounded-circle bg-light border">
@@ -92,10 +61,18 @@
                             </button>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary rounded px-4 py-2 mb-4">
-                        Add to cart
-                    </button>
-                </form>
+                    @auth
+                        <button type="button" class="btn btn-primary rounded px-4 py-2 mb-4 ms-3 add-to-cart-detail"
+                            data-product-id="{{ $product->id }}">
+                            Add to cart
+                        </button>
+                    @else
+                        <button type="button" class="btn btn-secondary rounded px-4 py-2 mb-4 ms-3"
+                            onclick="AuthHelper.showLoginPrompt('add items to cart')">
+                            Login to Add
+                        </button>
+                    @endauth
+                </div>
 
                 <div class="d-flex pt-2">
                     <p class="text-dark font-weight-medium mb-0 mr-2">Share on:</p>
@@ -124,8 +101,8 @@
                     <div class="tab-pane fade" id="tab-pane-2">
                         <div class="row">
                             <div class="col-md-6">
-                                <h4 class="mb-4">{{ count($comments) > 0 ? count($comments) : 0 }} review for "Colorful
-                                    Stylish Shirt"</h4>
+                                <h4 class="mb-4">{{ count($comments) > 0 ? count($comments) : 0 }} review for
+                                    "{{ $product->name }}"</h4>
                                 @foreach ($comments as $item)
                                     <div class="media mb-4">
                                         <img src="{{ asset('profile_pic/' . $item->image) }}" alt="Image"
@@ -146,8 +123,6 @@
                                                         <i class="far fa-star"></i>
                                                     @endfor
                                                 @endif
-
-
                                             </div>
 
                                             <p>
@@ -162,77 +137,82 @@
                                 <h4 class="mb-4">Leave a review</h4>
                                 <div class="border rounded p-3 bg-light">
                                     <label for="rating">Rating *</label>
-                                    <form action="{{ route('user#rating') }}" method="post"
-                                        class="d-flex col-lg-5 justify-content-between">
-                                        @csrf
-                                        <div class="rating-css">
-                                            <div class="star-icon">
-                                                <input type="hidden" name="productId" value="{{ $product->id }}">
+                                    @auth
+                                        <form id="ratingForm" class="d-flex col-lg-5 justify-content-between">
+                                            @csrf
+                                            <div class="rating-css">
+                                                <div class="star-icon">
+                                                    <input type="hidden" name="productId" value="{{ $product->id }}">
+                                                    @if ($userRating == 0)
+                                                        <input type="radio" value="1" name="productRating" checked
+                                                            id="rating1">
+                                                        <label for="rating1" class="fa fa-star"></label>
 
-                                                @if ($userRating == 0)
-                                                    <input type="radio" value="1" name="productRating" checked
-                                                        id="rating1">
-                                                    <label for="rating1" class="fa fa-star"></label>
+                                                        <input type="radio" value="2" name="productRating"
+                                                            id="rating2">
+                                                        <label for="rating2" class="fa fa-star"></label>
 
-                                                    <input type="radio" value="2" name="productRating"
-                                                        id="rating2">
-                                                    <label for="rating2" class="fa fa-star"></label>
+                                                        <input type="radio" value="3" name="productRating"
+                                                            id="rating3">
+                                                        <label for="rating3" class="fa fa-star"></label>
 
-                                                    <input type="radio" value="3" name="productRating"
-                                                        id="rating3">
-                                                    <label for="rating3" class="fa fa-star"></label>
+                                                        <input type="radio" value="4" name="productRating"
+                                                            id="rating4">
+                                                        <label for="rating4" class="fa fa-star"></label>
 
-                                                    <input type="radio" value="4" name="productRating"
-                                                        id="rating4">
-                                                    <label for="rating4" class="fa fa-star"></label>
-
-                                                    <input type="radio" value="5" name="productRating"
-                                                        id="rating5">
-                                                    <label for="rating5" class="fa fa-star"></label>
-                                                @else
-                                                    @for ($i = 1; $i <= $userRating; $i++)
-                                                        <input type="radio" value="{{ $i }}"
-                                                            name="productRating" checked id="rating{{ $i }}">
-                                                        <label for="rating{{ $i }}"
-                                                            class="fa fa-star"></label>
-                                                    @endfor
-
-                                                    @for ($j = $userRating + 1; $j <= 5; $j++)
-                                                        <input type="radio" value="{{ $j }}"
-                                                            name="productRating" id="rating{{ $j }}">
-                                                        <label for="rating{{ $j }}"
-                                                            class="fa fa-star"></label>
-                                                    @endfor
-                                                @endif
-
-
+                                                        <input type="radio" value="5" name="productRating"
+                                                            id="rating5">
+                                                        <label for="rating5" class="fa fa-star"></label>
+                                                    @else
+                                                        @for ($i = 1; $i <= $userRating; $i++)
+                                                            <input type="radio" value="{{ $i }}"
+                                                                name="productRating" checked id="rating{{ $i }}">
+                                                            <label for="rating{{ $i }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                        @for ($j = $userRating + 1; $j <= 5; $j++)
+                                                            <input type="radio" value="{{ $j }}"
+                                                                name="productRating" id="rating{{ $j }}">
+                                                            <label for="rating{{ $j }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                    @endif
+                                                </div>
                                             </div>
+                                            <div class="form-group d-flex align-items-center">
+                                                <input type="submit" value="Rate"
+                                                    class="btn btn-sm btn-primary px-3 rounded" />
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div class="alert alert-info">
+                                            <a href="{{ route('login') }}?redirect={{ url()->current() }}">Log in</a> to rate
+                                            this product.
                                         </div>
+                                    @endauth
 
-                                        <div class="form-group d-flex align-items-center">
-                                            <input type="submit" value="Rate"
-                                                class="btn btn-sm btn-primary px-3 rounded" />
+                                    @auth
+                                        <form id="commentForm" method="post">
+                                            @csrf
+                                            <input type="hidden" name="productId" value="{{ $product->id }}">
+                                            <div class="form-group">
+                                                <label for="message">Your Review *</label>
+                                                <textarea id="message" name="message" cols="30" rows="5"
+                                                    class="form-control @error('message') is-invalid @enderror"></textarea>
+                                                @error('message')
+                                                    <small class="invalid-feedback">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <input type="submit" value="Submit" class="btn btn-primary px-3 rounded" />
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div class="alert alert-info mt-3">
+                                            <a href="{{ route('login') }}?redirect={{ url()->current() }}">Log in</a> to post
+                                            a review.
                                         </div>
-                                    </form>
-
-                                    <form action="{{ route('create#comment') }}" method="post">
-                                        @csrf
-
-                                        <input type="hidden" name="productId" value="{{ $product->id }}">
-
-                                        <div class="form-group">
-                                            <label for="message">Your Review *</label>
-                                            <textarea id="message" name="message" cols="30" rows="5"
-                                                class="form-control @error('message') is-invalid @enderror"></textarea>
-                                            @error('message')
-                                                <small class="invalid-feedback">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-
-                                        <div class="form-group mt-2">
-                                            <input type="submit" value="Submit" class="btn btn-primary px-3 rounded" />
-                                        </div>
-                                    </form>
+                                    @endauth
                                 </div>
                             </div>
                         </div>
@@ -243,7 +223,7 @@
     </div>
     <!-- Shop Detail End -->
 
-    <!-- Products Start -->
+    <!-- Related Products Start -->
     <section id="related-products" class="related-products product-carousel py-5 position-relative overflow-hidden">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 mb-3">
@@ -263,29 +243,40 @@
                                             style="height: 400px; overflow: hidden;" />
                                     </a>
                                     @php
-                                        $isInWishlist = $wishlistItems->firstWhere('product_id', $item->id);
+                                        $isInWishlist =
+                                            Auth::check() && $wishlistItems->firstWhere('product_id', $item->id);
                                     @endphp
-
-
-                                    @if ($isInWishlist)
-                                        <a href="{{ route('wishlist#remove', $isInWishlist->id) }}"
-                                            title="Remove from Wishlist" class="btn-icon btn-wishlist"><i
-                                                class="fa-solid fa-heart"></i></a>
+                                    @auth
+                                        <a href="#"
+                                            title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                                            class="btn-icon btn-wishlist wishlist-toggle"
+                                            data-product-id="{{ $item->id }}">
+                                            <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                        </a>
                                     @else
-                                        <a href="{{ route('wishlist#add', $item->id) }}" title="Add to Wishlist"
-                                            class="btn-icon btn-wishlist">
+                                        <a href="#" title="Add to Wishlist" class="btn-icon btn-wishlist"
+                                            onclick="AuthHelper.showLoginPrompt('add to wishlist'); return false;">
                                             <i class="fa-regular fa-heart"></i>
                                         </a>
-                                    @endif
+                                    @endauth
                                     <div class="product-content">
                                         <h5 class="element-title text-uppercase fs-5 mt-3">
                                             <a
                                                 href="{{ route('shop#productDetails', $item->id) }}">{{ $item->name }}</a>
                                         </h5>
-                                        <a href="{{ route('user#addToCartGet', $item->id) }}"
-                                            class="text-decoration-none"
-                                            data-after="Add to cart"><span>{{ number_format($item->price) }}
-                                                MMK</span></a>
+                                        @auth
+                                            <a href="#" class="text-decoration-none add-to-cart-related"
+                                                data-product-id="{{ $item->id }}" data-qty="1"
+                                                data-after="Add to cart">
+                                                <span>{{ number_format($item->price) }} MMK</span>
+                                            </a>
+                                        @else
+                                            <a href="#" class="text-decoration-none"
+                                                onclick="AuthHelper.showLoginPrompt('add items to cart'); return false;"
+                                                data-after="Add to cart">
+                                                <span>{{ number_format($item->price) }} MMK</span>
+                                            </a>
+                                        @endauth
                                     </div>
                                 </div>
                             </div>
@@ -312,12 +303,72 @@
 @section('js-script')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-            toastElList.forEach(function(toastEl) {
-                var toast = new bootstrap.Toast(toastEl, {
-                    delay: 3000
+            // Quantity buttons
+            const minusBtn = document.querySelector('.btn-minus');
+            const plusBtn = document.querySelector('.btn-plus');
+            const qtyInput = document.getElementById('product-qty');
+            if (minusBtn && plusBtn && qtyInput) {
+                minusBtn.addEventListener('click', function() {
+                    let val = parseInt(qtyInput.value);
+                    if (val > 1) qtyInput.value = val - 1;
                 });
-                toast.show();
+                plusBtn.addEventListener('click', function() {
+                    let val = parseInt(qtyInput.value);
+                    qtyInput.value = val + 1;
+                });
+            }
+
+            // Add to Cart (detail page)
+            document.querySelector('.add-to-cart-detail')?.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                const qty = parseInt(document.getElementById('product-qty').value) || 1;
+                if (AuthHelper.isAuthenticated()) {
+                    addToCart(productId, qty);
+                } else {
+                    AuthHelper.showLoginPrompt('add items to cart');
+                }
+            });
+
+            // Add to Cart (related products)
+            document.querySelectorAll('.add-to-cart-related').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    const qty = this.dataset.qty || 1;
+                    if (AuthHelper.isAuthenticated()) {
+                        addToCart(productId, qty);
+                    } else {
+                        AuthHelper.showLoginPrompt('add items to cart');
+                    }
+                });
+            });
+
+            // Wishlist toggle (related products)
+            document.querySelectorAll('.wishlist-toggle').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    if (AuthHelper.isAuthenticated()) {
+                        toggleWishlist(productId, this);
+                    } else {
+                        AuthHelper.showLoginPrompt('add to wishlist');
+                    }
+                });
+            });
+
+            // Rating form via AJAX
+            document.getElementById('ratingForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const productId = formData.get('productId');
+                const rating = formData.get('productRating');
+                submitRating(productId, rating);
+            });
+
+            // Comment form via AJAX
+            document.getElementById('commentForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitComment(this);
             });
         });
     </script>

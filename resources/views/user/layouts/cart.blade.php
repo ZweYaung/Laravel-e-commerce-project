@@ -26,62 +26,111 @@
                         </tr>
                     </thead>
                     <tbody class="align-middle">
-                        @if (count($cart) != 0)
-                            @foreach ($cart as $item)
+                        @if (Auth::check())
+                            {{-- Logged-in user cart --}}
+                            @if (count($cart) != 0)
+                                @foreach ($cart as $item)
+                                    <tr data-cart-id="{{ $item->cart_id }}">
+                                        <td class="align-middle text-center">
+                                            <img src="{{ asset('productImage/' . $item->image) }}" alt="Product Image"
+                                                class="rounded"
+                                                style="width: 100px; height: 100px; object-fit: contain; border-radius: 8px;" />
+                                        </td>
+                                        <td>{{ $item->name }}</td>
+                                        <td class="align-middle price">{{ number_format($item->price) }} MMK</td>
+                                        <td style="vertical-align: middle;">
+                                            <div class="input-group quantity" style="width: 100px;">
+                                                <div class="input-group-btn">
+                                                    <button class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                </div>
+                                                <input type="text"
+                                                    class="form-control qty form-control-sm text-center border-0"
+                                                    value="{{ $item->qty }}" data-cart-id="{{ $item->cart_id }}" />
+                                                <div class="input-group-btn">
+                                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle total">{{ number_format($item->price * $item->qty) }} MMK
+                                        </td>
+                                        <td class="align-middle">
+                                            <input type="hidden" name="cartId" class="cartId"
+                                                value="{{ $item->cart_id }}">
+                                            <input type="hidden" class="userId" value="{{ Auth::user()->id }}">
+                                            <input type="hidden" class="productId" value="{{ $item->product_id }}">
+                                            <button class="btn btn-remove btn-sm btn-primary rounded">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
                                 <tr>
-
-
-                                    <td class="align-middle text-center">
-                                        <img src="{{ asset('productImage/' . $item->image) }}" alt="Product Image"
-                                            class="rounded"
-                                            style="width: 100px; height: 100px; object-fit: contain; border-radius: 8px;" />
-                                    </td>
-
-                                    <td>{{ $item->name }}</td>
-                                    <td class="align-middle price">{{ number_format($item->price) }} MMK</td>
-                                    <td style="vertical-align: middle;">
-                                        <div class="input-group quantity" style="width: 100px;">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-sm btn-minus rounded-circle bg-light border"
-                                                    id="btn-minus">
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
-                                            </div>
-                                            <input type="text"
-                                                class="form-control qty form-control-sm text-center border-0"
-                                                value="{{ $item->qty }}">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border"
-                                                    id="btn-plus">
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="align-middle total">{{ number_format($item->price * $item->qty) }} MMK</td>
-
-                                    <td class="align-middle">
-                                        <input type="hidden" name="cartId" class="cartId" value="{{ $item->cart_id }}">
-                                        <input type="hidden" class="userId" value="{{ Auth::user()->id }}">
-                                        <input type="hidden" class="productId" value="{{ $item->product_id }}">
-                                        <button class="btn btn-remove btn-sm btn-primary rounded">
-                                            <i class="fa fa-times"></i>
-                                        </button>
+                                    <td colspan="7" class="p-5">
+                                        <h5 class="text-muted text-center">No items in cart</h5>
+                                        <a href="{{ route('user#shop') }}" class="btn btn-outline-dark mt-3">Return to
+                                            shop</a>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @endif
                         @else
-                            <tr>
-                                <td colspan="7" class="p-5">
-                                    <h5 class="text-muted text-center">No items in cart</h5>
-                                    <a href="{{ route('user#shop') }}" class="btn btn-outline-dark mt-3">Return to shop</a>
-                                </td>
-                            </tr>
+                            {{-- Guest cart from session --}}
+                            @if (count($cart) > 0)
+                                @foreach ($cart as $id => $item)
+                                    <tr data-product-id="{{ $id }}" class="guest-cart-item">
+                                        <td class="align-middle text-center">
+                                            <img src="{{ asset('productImage/' . $item['image']) }}" alt="Product Image"
+                                                class="rounded"
+                                                style="width: 100px; height: 100px; object-fit: contain; border-radius: 8px;" />
+                                        </td>
+                                        <td>{{ $item['name'] }}</td>
+                                        <td class="align-middle price">{{ number_format($item['price']) }} MMK</td>
+                                        <td style="vertical-align: middle;">
+                                            <div class="input-group quantity" style="width: 100px;">
+                                                <div class="input-group-btn">
+                                                    <button
+                                                        class="btn btn-sm btn-minus rounded-circle bg-light border guest-qty-btn">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                </div>
+                                                <input type="text"
+                                                    class="form-control qty form-control-sm text-center border-0 guest-qty"
+                                                    value="{{ $item['quantity'] }}"
+                                                    data-product-id="{{ $id }}" />
+                                                <div class="input-group-btn">
+                                                    <button
+                                                        class="btn btn-sm btn-plus rounded-circle bg-light border guest-qty-btn">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle total">
+                                            {{ number_format($item['price'] * $item['quantity']) }} MMK</td>
+                                        <td class="align-middle">
+                                            <button class="btn btn-remove btn-sm btn-primary rounded guest-remove"
+                                                data-product-id="{{ $id }}">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="7" class="p-5">
+                                        <h5 class="text-muted text-center">No items in cart</h5>
+                                        <a href="{{ route('user#shop') }}" class="btn btn-outline-dark mt-3">Return to
+                                            shop</a>
+                                    </td>
+                                </tr>
+                            @endif
                         @endif
                     </tbody>
                 </table>
-
             </div>
             <div class="col-lg-4 mt-5">
                 <div class="card border-0 mb-5">
@@ -104,9 +153,16 @@
                             <h5 class="font-weight-bold" id="finaltotal">{{ number_format($total + 5000) }} MMK</h5>
                         </div>
                         @if (count($cart) != 0)
-                            <button type="button" id="btn-checkout" class="btn btn-block rounded btn-primary my-3 p-2">
-                                Proceed To Checkout
-                            </button>
+                            @auth
+                                <button type="button" id="btn-checkout" class="btn btn-block rounded btn-primary my-3 p-2">
+                                    Proceed To Checkout
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-block rounded btn-secondary my-3 p-2"
+                                    onclick="AuthHelper.showLoginPrompt('checkout')">
+                                    Login to Checkout
+                                </button>
+                            @endauth
                         @endif
                     </div>
                 </div>
@@ -120,77 +176,186 @@
     <script>
         $(document).ready(function() {
 
-            $('.btn-minus').click(function() {
-                countCalculation(this);
-                finalTotalCalculation()
-
-            });
-
-            $('.btn-plus').click(function() {
-                countCalculation(this);
-                finalTotalCalculation()
-            });
-
-            function countCalculation(event) {
-                parentNode = $(event).parents("tr");
-                price = parentNode.find(".price").text().replace(/[^\d.]/g, "");
-                qty = parentNode.find(".qty").val();
-                price = parseInt(price);
-                qty = parseInt(qty);
-
-                total = price * qty
-
-                parentNode.find(".total").text(formatNumber(total) + " MMK");
-            }
-
-            //format numbers with commas
+            // Helper functions
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
 
-            function finalTotalCalculation() {
-                total = 0;
-
+            function updateCartTotals() {
+                let total = 0;
                 $("#productTable tbody tr").each(function(index, item) {
-                    total += parseInt($(item).find(".total").text().replace(/[^\d.]/g, ""));
-                })
-
+                    let priceText = $(item).find(".price").text().replace(/[^\d.]/g, "");
+                    let qty = parseInt($(item).find(".qty").val()) || 0;
+                    let price = parseInt(priceText) || 0;
+                    let itemTotal = price * qty;
+                    $(item).find(".total").text(formatNumber(itemTotal) + " MMK");
+                    total += itemTotal;
+                });
                 $("#subtotal").html(formatNumber(total) + " MMK");
                 $("#finaltotal").html(formatNumber(total + 5000) + " MMK");
-
             }
 
-            $(".btn-remove").click(function() {
-                parentNode = $(this).parents("tr");
-                cartId = parentNode.find(".cartId").val();
+            // Logged-in user cart actions
 
-                removeData = {
-                    'cartId': cartId
-                };
+            // Quantity change (minus/plus)
+            $(document).on('click', '.btn-minus, .btn-plus', function() {
+                let parentTr = $(this).closest('tr');
+                let qtyInput = parentTr.find('.qty');
+                let currentVal = parseInt(qtyInput.val()) || 1;
+                if ($(this).hasClass('btn-minus')) {
+                    if (currentVal > 1) qtyInput.val(currentVal - 1);
+                } else {
+                    qtyInput.val(currentVal + 1);
+                }
+                updateCartTotals();
+
+                let cartId = parentTr.data('cart-id');
+                if (cartId) {
+                    let newQty = parseInt(qtyInput.val());
+                    $.ajax({
+                        type: 'PATCH',
+                        url: '/user/cart/update/' + cartId,
+                        data: {
+                            quantity: newQty
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json'
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                AuthHelper.updateCartCount(res.cartCount);
+                            }
+                        },
+                        error: function() {
+                            AuthHelper.showToast('Error updating quantity', 'danger');
+                        }
+                    });
+                }
+            });
+
+            // Remove item (logged-in) - NO CONFIRMATION
+            $(document).on('click', '.btn-remove', function() {
+                let parentTr = $(this).closest('tr');
+                let cartId = parentTr.find('.cartId').val();
+                if (!cartId) return;
+
+                // Show a loading state on the button
+                let btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 
                 $.ajax({
                     type: 'get',
                     url: '/user/remove/cart',
-                    data: removeData,
+                    data: {
+                        cartId: cartId
+                    },
                     dataType: 'json',
                     success: function(res) {
-                        res.status == 'success' ? location.reload() : "";
+                        if (res.status == 'success') {
+                            parentTr.fadeOut(300, function() {
+                                $(this).remove();
+                                updateCartTotals();
+                                AuthHelper.updateCartCount(res.cartCount || 0);
+                                AuthHelper.showToast('Item removed', 'success');
+                                if ($("#productTable tbody tr").length === 0) {
+                                    location.reload();
+                                }
+                            });
+                        }
                     },
                     error: function() {
-                        console.log("Opps! Something went wrong!")
+                        btn.prop('disabled', false).html('<i class="fa fa-times"></i>');
+                        AuthHelper.showToast('Error removing item', 'danger');
                     }
-                })
-            })
+                });
+            });
 
+            // Guest cart actions
+
+            // Quantity change for guest
+            $(document).on('click', '.guest-qty-btn', function() {
+                let parentTr = $(this).closest('tr');
+                let qtyInput = parentTr.find('.guest-qty');
+                let currentVal = parseInt(qtyInput.val()) || 1;
+                if ($(this).hasClass('btn-minus')) {
+                    if (currentVal > 1) qtyInput.val(currentVal - 1);
+                } else {
+                    qtyInput.val(currentVal + 1);
+                }
+                updateCartTotals();
+
+                let productId = qtyInput.data('product-id');
+                let newQty = parseInt(qtyInput.val());
+                $.ajax({
+                    type: 'PATCH',
+                    url: '/user/guest/cart/update',
+                    data: {
+                        productId: productId,
+                        quantity: newQty
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            AuthHelper.updateCartCount(res.cartCount);
+                        }
+                    },
+                    error: function() {
+                        AuthHelper.showToast('Error updating quantity', 'danger');
+                    }
+                });
+            });
+
+            // Remove guest item - NO CONFIRMATION
+            $(document).on('click', '.guest-remove', function() {
+                let productId = $(this).data('product-id');
+                let btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/user/guest/cart/remove',
+                    data: {
+                        productId: productId
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            let row = $(`tr[data-product-id="${productId}"]`);
+                            row.fadeOut(300, function() {
+                                $(this).remove();
+                                updateCartTotals();
+                                AuthHelper.updateCartCount(res.cartCount);
+                                AuthHelper.showToast('Item removed', 'success');
+                                if ($("#productTable tbody tr").length === 0) {
+                                    location.reload();
+                                }
+                            });
+                        }
+                    },
+                    error: function() {
+                        btn.prop('disabled', false).html('<i class="fa fa-times"></i>');
+                        AuthHelper.showToast('Error removing item', 'danger');
+                    }
+                });
+            });
+
+            // Checkout
             $('#btn-checkout').click(function() {
-                orderList = [];
-                userId = $('.userId').val();
-                orderCode = "COS-209-" + Math.floor(Math.random() * 10000000000);
+                let orderList = [];
+                let userId = $('.userId').val();
+                let orderCode = "COS-209-" + Math.floor(Math.random() * 10000000000);
 
-                $('#productTable  tbody tr').each(function(index, row) {
-                    productId = $(row).find('.productId').val();
-                    qty = $(row).find('.qty').val();
-                    finalTotal = $('#finaltotal').text().replace(/[^\d.]/g, "");
+                $('#productTable tbody tr').each(function(index, row) {
+                    let productId = $(row).find('.productId').val();
+                    let qty = $(row).find('.qty').val();
+                    let finalTotal = $('#finaltotal').text().replace(/[^\d.]/g, "");
 
                     orderList.push({
                         'product_id': productId,
@@ -200,7 +365,7 @@
                         'order_code': orderCode,
                         'totalAmt': finalTotal
                     });
-                })
+                });
 
                 $.ajax({
                     type: 'get',
@@ -209,13 +374,13 @@
                     dataType: 'json',
                     success: function(res) {
                         res.status == 'success' ? location.href = '/user/checkOutPage' :
-                            location
-                            .reload();
+                            location.reload();
                     }
-                })
+                });
+            });
 
-            })
-
-        })
+            // Initial totals
+            updateCartTotals();
+        });
     </script>
 @endsection

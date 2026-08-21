@@ -17,17 +17,7 @@
     <div class="container-fluid pt-5">
         <div class="row d-flex justify-content-end align-items-center p-3">
             <div class="col-auto">
-                @if (session('addToCart'))
-                    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                {{ session('addToCart') }}
-                            </div>
-                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                        </div>
-                    </div>
-                @endif
+                <!-- Toast messages will now be handled by JS -->
             </div>
         </div>
         <div class="row px-xl-5 d-flex justify-content-center">
@@ -51,7 +41,6 @@
                                 <a class="dropdown-toggle btn" href="#" id="dropdownHome" data-bs-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
 
-                                    {{-- display selected sorting --}}
                                     @php
                                         $sortText = 'Sort by';
                                         if ($action == 'oldest') {
@@ -99,25 +88,28 @@
                                         style="height: 400px;">
                                         <a href="{{ route('shop#productDetails', $item->id) }}">
                                             <img class="img-fluid w-100 h-100"
-                                                src="{{ asset('productImage/' . $item->image) }}"
-                                                alt="{{ $item->name }}" style="object-fit: cover;">
+                                                src="{{ asset('productImage/' . $item->image) }}" alt="{{ $item->name }}"
+                                                style="object-fit: cover;">
                                         </a>
 
                                         @php
-                                            $isInWishlist = $wishlistItems->firstWhere('product_id', $item->id);
+                                            $isInWishlist =
+                                                Auth::check() && $wishlistItems->firstWhere('product_id', $item->id);
                                         @endphp
 
-
-                                        @if ($isInWishlist)
-                                            <a href="{{ route('wishlist#remove', $isInWishlist->id) }}"
-                                                title="Remove from Wishlist" class="btn-icon btn-wishlist"><i
-                                                    class="fa-solid fa-heart"></i></a>
+                                        @auth
+                                            <a href="#"
+                                                title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                                                class="btn-icon btn-wishlist wishlist-toggle"
+                                                data-product-id="{{ $item->id }}">
+                                                <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                            </a>
                                         @else
-                                            <a href="{{ route('wishlist#add', $item->id) }}" title="Add to Wishlist"
-                                                class="btn-icon btn-wishlist">
+                                            <a href="#" title="Add to Wishlist" class="btn-icon btn-wishlist"
+                                                onclick="AuthHelper.showLoginPrompt('add to wishlist'); return false;">
                                                 <i class="fa-regular fa-heart"></i>
                                             </a>
-                                        @endif
+                                        @endauth
 
                                     </div>
 
@@ -131,15 +123,17 @@
                                     </div>
 
                                     <div class="card-footer d-flex justify-content-center bg-light border mt-auto">
-                                        <form action="{{ route('user#addToCart') }}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="userId" value="{{ Auth::user()->id }}">
-                                            <input type="hidden" name="productId" value="{{ $item->id }}">
-                                            <input type="hidden" name="qty" value="1">
-                                            <button type="submit" class="btn btn-sm text-dark p-0">
+                                        @auth
+                                            <button class="btn btn-sm text-dark p-0 add-to-cart-btn"
+                                                data-product-id="{{ $item->id }}" data-qty="1">
                                                 <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
                                             </button>
-                                        </form>
+                                        @else
+                                            <button class="btn btn-sm text-dark p-0"
+                                                onclick="AuthHelper.showLoginPrompt('add items to cart'); return false;">
+                                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                                            </button>
+                                        @endauth
                                     </div>
                                 </div>
                             </div>
@@ -162,12 +156,31 @@
 @section('js-script')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-            toastElList.forEach(function(toastEl) {
-                var toast = new bootstrap.Toast(toastEl, {
-                    delay: 3000
+            // Add to Cart buttons
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    const qty = this.dataset.qty || 1;
+                    if (AuthHelper.isAuthenticated()) {
+                        addToCart(productId, qty);
+                    } else {
+                        AuthHelper.showLoginPrompt('add items to cart');
+                    }
                 });
-                toast.show();
+            });
+
+            // Wishlist toggle buttons
+            document.querySelectorAll('.wishlist-toggle').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    if (AuthHelper.isAuthenticated()) {
+                        toggleWishlist(productId, this);
+                    } else {
+                        AuthHelper.showLoginPrompt('add to wishlist');
+                    }
+                });
             });
         });
     </script>

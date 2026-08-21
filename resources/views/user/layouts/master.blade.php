@@ -7,6 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    {{-- CSRF Token --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {{-- Auth status meta tags --}}
+    @auth
+        <meta name="user-id" content="{{ auth()->id() }}">
+        <meta name="user-authenticated" content="true">
+    @else
+        <meta name="user-authenticated" content="false">
+    @endauth
+
     {{-- bootstrap cdn link --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
@@ -29,6 +40,7 @@
 </head>
 
 <body class="homepage">
+    <!-- Offcanvas Wishlist -->
     <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart"
         aria-labelledby="My Cart">
         <div class="offcanvas-header justify-content-center"> <button type="button" class="btn-close"
@@ -37,38 +49,52 @@
         <div class="offcanvas-body">
             <div class="order-md-last">
                 <h4 class="d-flex justify-content-between align-items-center mb-3"> <span class="text-primary">Your
-                        Wishlist</span> <span class="badge bg-primary rounded-pill">{{ $wishlistItems->count() }}</span>
+                        Wishlist</span> <span class="badge bg-primary rounded-pill wish-count-badge">
+                        @auth
+                            {{ $wishlistItems->count() ?? 0 }}
+                        @else
+                            0
+                        @endauth
+                    </span>
                 </h4>
-                <ul class="list-group mb-3">
-                    @forelse($wishlistItems as $item)
-                        <form action="{{ route('user#addToCart') }}" method="post"> @csrf <li
-                                class="list-group-item d-flex justify-content-between lh-sm">
-                                <div class="d-flex justify-center"> <!-- Remove Button --> <a
-                                        href="{{ route('wishlist#remove', $item->id) }}"
-                                        class="d-flex align-items-center"> <i
-                                            class="fa-solid fa-xmark text-primary"></i> </a>
-                                    <div class="ms-2"> <a
-                                            href="{{ route('shop#productDetails', $item->product->id) }}"
-                                            title="See the product's details">
-                                            <h6 class="my-0">{{ $item->product->name }}</h6>
-                                        </a> <small
-                                            class="text-body-secondary">{{ number_format($item->product->price) }}
-                                            MMK</small> </div>
-                                </div> <!-- Add to Cart Button --> <input type="hidden" name="userId"
-                                    value="{{ Auth::user()->id }}"> <input type="hidden" name="productId"
-                                    value="{{ $item->product->id }}"> <input type="hidden" name="qty"
-                                    value="1"> <button type="submit" title="Add to Cart"
-                                    class="border-0 bg-transparent"> <i class="fa-solid fa-cart-plus text-primary"></i>
-                                </button>
+                <ul class="list-group mb-3 wishlist-items">
+                    @auth
+                        @forelse($wishlistItems as $item)
+                            <form action="{{ route('user#addToCart') }}" method="post"> @csrf <li
+                                    class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div class="d-flex justify-center"> <a href="{{ route('wishlist#remove', $item->id) }}"
+                                            class="d-flex align-items-center"> <i
+                                                class="fa-solid fa-xmark text-primary"></i> </a>
+                                        <div class="ms-2"> <a
+                                                href="{{ route('shop#productDetails', $item->product->id) }}"
+                                                title="See the product's details">
+                                                <h6 class="my-0">{{ $item->product->name }}</h6>
+                                            </a> <small
+                                                class="text-body-secondary">{{ number_format($item->product->price) }}
+                                                MMK</small> </div>
+                                    </div> <input type="hidden" name="userId" value="{{ Auth::user()->id }}"> <input
+                                        type="hidden" name="productId" value="{{ $item->product->id }}"> <input
+                                        type="hidden" name="qty" value="1"> <button type="submit"
+                                        title="Add to Cart" class="border-0 bg-transparent"> <i
+                                            class="fa-solid fa-cart-plus text-primary"></i>
+                                    </button>
+                                </li>
+                        </form> @empty <li class="list-group-item text-center text-muted"> No items in wishlist
                             </li>
-                    </form> @empty <li class="list-group-item text-center text-muted"> No items in wishlist
+                        @endforelse
+                    @else
+                        <li class="list-group-item text-center text-muted">
+                            <a href="{{ route('login') }}?redirect={{ url()->current() }}">Log in</a> to see your
+                            wishlist.
                         </li>
-                    @endforelse
+                    @endauth
                 </ul>
             </div>
         </div>
 
     </div>
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
         <div class="container-fluid">
             <div class="row justify-content-between align-items-center w-100">
@@ -107,39 +133,44 @@
                                 <li class="nav-item d-lg-none mt-2">
                                     <a class="nav-link" href="{{ route('user#cart') }}">Cart <span
                                             class="cart-count">(
-                                            {{ $cartCount }} )</span></a>
+                                            {{ $cartCount ?? 0 }} )</span></a>
                                 </li>
                                 <li class="nav-item d-lg-none">
                                     <a class="nav-link" href="#" data-bs-toggle="offcanvas"
                                         data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">Wishlist <span
-                                            class="wish-count">( {{ $wishlistItems->count() }} )</span></a>
+                                            class="wish-count">(
+                                            @auth {{ $wishlistItems->count() ?? 0 }}
+                                            @else
+                                            0 @endauth )</span></a>
                                 </li>
-                                <li class="nav-item dropdown d-lg-none">
-                                    <a class="dropdown-toggle nav-link" href="#" id="dropdownHomeMobile"
-                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <img src="{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
-                                            class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
-                                            alt="">
-                                        <small>{{ Auth::user()->name ?? Auth::user()->nickname }}</small>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownHomeMobile">
-                                        <li><a class="dropdown-item" href="{{ route('user#editPage') }}">Profile</a>
-                                        </li>
-                                        @if (Auth::user()->password)
-                                            <li><a class="dropdown-item"
-                                                    href="{{ route('user#changePasswordPage') }}">Change Password</a>
+                                @auth
+                                    <li class="nav-item dropdown d-lg-none">
+                                        <a class="dropdown-toggle nav-link" href="#" id="dropdownHomeMobile"
+                                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <img src="{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                                class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
+                                                alt="">
+                                            <small>{{ Auth::user()->name ?? Auth::user()->nickname }}</small>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownHomeMobile">
+                                            <li><a class="dropdown-item" href="{{ route('user#editPage') }}">Profile</a>
                                             </li>
-                                        @endif
-                                        <li><a class="dropdown-item" href="{{ route('user#orderList') }}">Order
-                                                List</a></li>
-                                        <li>
-                                            <form action="{{ route('logout') }}" method="post">
-                                                @csrf
-                                                <input type="submit" class="dropdown-item" value="LOGOUT">
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </li>
+                                            @if (Auth::user()->password)
+                                                <li><a class="dropdown-item"
+                                                        href="{{ route('user#changePasswordPage') }}">Change Password</a>
+                                                </li>
+                                            @endif
+                                            <li><a class="dropdown-item" href="{{ route('user#orderList') }}">Order
+                                                    List</a></li>
+                                            <li>
+                                                <form action="{{ route('logout') }}" method="post">
+                                                    @csrf
+                                                    <input type="submit" class="dropdown-item" value="LOGOUT">
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                @endauth
                             </ul>
                         </div>
                     </div>
@@ -147,40 +178,55 @@
                 <div class="col-auto col-lg-auto">
                     <ul class="list-unstyled d-flex m-0">
                         <li class="d-none d-lg-block"> <a href="{{ route('user#cart') }}"
-                                class="text-uppercase mx-3">Cart <span class="cart-count">( {{ $cartCount }}
-                                    )</span> </a> </li>
-                        <li class="d-none d-lg-block"> <a href="index.html" class="text-uppercase mx-3"
+                                class="text-uppercase mx-3">Cart <span class="cart-count">( <span
+                                        id="cartCount">{{ $cartCount ?? 0 }}</span> )</span> </a> </li>
+                        <li class="d-none d-lg-block"> <a href="#" class="text-uppercase mx-3"
                                 data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                                aria-controls="offcanvasCart">Wishlist <span class="wish-count">(
-                                    {{ $wishlistItems->count() }} )</span> </a> </li>
-                        <li class=" d-none d-lg-block dropdown"> <a class="dropdown-toggle" href="#"
-                                id="dropdownHome" data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"> <img
-                                    src="{{ Auth::user()->image != null ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
-                                    class="img-profile rounded-circle" style="height: 28px; width: 28px"
-                                    alt="">
-                                <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">
-                                <li> <a href="{{ route('user#editPage') }}"
-                                        class="dropdown-item item-anchor">Profile</a> </li>
-                                @if (Auth::user()->password)
-                                    <li> <a href="{{ route('user#changePasswordPage') }}"
-                                            class="dropdown-item item-anchor">Change Password</a> </li>
-                                @endif
-                                <li> <a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
-                                        List</a> </li>
-                                <li>
-                                    <form action="{{ route('logout') }}" method="post"> @csrf <input type="submit"
-                                            class="dropdown-item item-anchor" value="LOGOUT"> </form>
-                                </li>
-                            </ul>
-                        </li>
+                                aria-controls="offcanvasCart">Wishlist <span class="wish-count">( <span
+                                        id="wishlistCount">@auth {{ $wishlistItems->count() ?? 0 }}
+                                        @else
+                                        0 @endauth
+                                    </span> )</span> </a> </li>
+                        @auth
+                            <li class="d-none d-lg-block dropdown"> <a class="dropdown-toggle" href="#"
+                                    id="dropdownHome" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"> <img
+                                        src="{{ Auth::user()->image != null ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                        class="img-profile rounded-circle" style="height: 28px; width: 28px"
+                                        alt="">
+                                    <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">
+                                    <li> <a href="{{ route('user#editPage') }}"
+                                            class="dropdown-item item-anchor">Profile</a> </li>
+                                    @if (Auth::user()->password)
+                                        <li> <a href="{{ route('user#changePasswordPage') }}"
+                                                class="dropdown-item item-anchor">Change Password</a> </li>
+                                    @endif
+                                    <li> <a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
+                                            List</a> </li>
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="post"> @csrf <input type="submit"
+                                                class="dropdown-item item-anchor" value="LOGOUT"> </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @else
+                            <li class="d-none d-lg-block">
+                                <a href="{{ route('login') }}?redirect={{ url()->current() }}"
+                                    class="text-uppercase mx-3">Login</a>
+                                <a href="{{ route('register') }}" class="text-uppercase mx-3">Register</a>
+                            </li>
+                        @endauth
                     </ul>
                 </div>
             </div>
         </div>
-    </nav> @yield('content') <footer id="footer" class="mt-5">
+    </nav>
+
+    @yield('content')
+
+    <footer id="footer" class="mt-5">
         <div class="container">
             <div class="row d-flex flex-wrap justify-content-between py-5">
                 <div class="col-md-3 col-sm-6">
@@ -260,35 +306,49 @@
                 </div>
             </div>
         </div>
+        <!-- Footer Bottom - Replaced with proper copyright -->
         <div class="border-top py-4">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6 d-flex flex-wrap">
-                        <div class="shipping">
-                            <span>We ship with:</span>
-                            <img src="images/arct-icon.png" alt="icon" />
-                            <img src="images/dhl-logo.png" alt="icon" />
-                        </div>
-                        <div class="payment-option">
-                            <span>Payment Option:</span>
-                            <img src="images/visa-card.png" alt="card" />
-                            <img src="images/paypal-card.png" alt="card" />
-                            <img src="images/master-card.png" alt="card" />
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <p>I do not own the design of this website.</p>
-                        <p>
-                            © Copyright 2022 Kaira. All rights reserved. Design by
-                            <a href="https://templatesjungle.com" target="_blank">TemplatesJungle</a>
-                            Distribution By
-                            <a href="https://themewagon.com" target="blank">ThemeWagon</a>
-                        </p>
+                    <div class="col-md-12 text-center">
+                        <p class="mb-0">&copy; {{ date('Y') }} STYLEHUB. All rights reserved.</p>
+                        <p class="mb-0 small text-muted">Built with <i class="fa-solid fa-heart text-danger"></i> for
+                            fashion lovers everywhere.</p>
                     </div>
                 </div>
             </div>
         </div>
     </footer>
+
+    {{-- Toast Container --}}
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    {{-- Login Required Modal --}}
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="loginModalMessage">Please log in to perform this action.</p>
+                    <div class="mt-3">
+                        <div class="d-grid gap-2">
+                            <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-primary">
+                                Log In
+                            </a>
+                            <a href="{{ route('register') }}" class="btn btn-outline-secondary">
+                                Create Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Scripts --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
         integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -299,16 +359,239 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="{{ asset('user/js/script.min.js') }}"></script>
-    <script src="{{ asset('user/js/main.js') }}"></script> @yield('js-script')
+    <script src="{{ asset('user/js/main.js') }}"></script>
+
+    {{-- Auth Helper & AJAX functions using jQuery --}}
     <script>
-        function loadFile(event) {
-            var reader = new FileReader();
-            reader.onload = function() {
-                var output = document.getElementById('output') output.src = reader.result;
+        // Auth Helper object for checking authentication status
+        var AuthHelper = {
+            isAuthenticated: function() {
+                return $('meta[name="user-authenticated"]').attr('content') === 'true';
+            },
+            getUserId: function() {
+                return $('meta[name="user-id"]').attr('content');
+            },
+            showLoginPrompt: function(action) {
+                action = action || 'perform this action';
+                $('#loginModalMessage').text('Please log in to ' + action);
+                var modal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
+                modal.show();
+            },
+            showToast: function(message, type) {
+                type = type || 'info';
+                var container = $('#toastContainer');
+                if (container.length === 0) {
+                    $('body').append(
+                        '<div id="toastContainer" style="position:fixed;top:20px;right:20px;z-index:9999;"></div>'
+                        );
+                    container = $('#toastContainer');
+                }
+                var toast = $('<div class="alert alert-' + type +
+                    ' alert-dismissible fade show" role="alert" style="min-width:250px;margin-bottom:10px;">' +
+                    message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+                    );
+                container.append(toast);
+                setTimeout(function() {
+                    toast.remove();
+                }, 5000);
+            },
+            updateCartCount: function(count) {
+                $('#cartCount').text(count);
+                $('.cart-count').each(function() {
+                    $(this).text('( ' + count + ' )');
+                });
+            },
+            updateWishlistCount: function(count) {
+                $('#wishlistCount').text(count);
+                $('.wish-count').each(function() {
+                    $(this).text('( ' + count + ' )');
+                });
+                $('.wish-count-badge').text(count);
             }
-            reader.readAsDataURL(event.target.files[0])
+        };
+
+        // AJAX Functions using jQuery
+
+        // Add to Cart for logged-in users
+        function addToCart(productId, qty) {
+            qty = qty || 1;
+            if (!AuthHelper.isAuthenticated()) {
+                AuthHelper.showLoginPrompt('add items to cart');
+                return;
+            }
+            $.ajax({
+                url: '/user/add/cart',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify({
+                    userId: AuthHelper.getUserId(),
+                    productId: productId,
+                    qty: qty
+                }),
+                success: function(data) {
+                    if (data.success) {
+                        AuthHelper.showToast('Added to cart!', 'success');
+                        AuthHelper.updateCartCount(data.cartCount);
+                    } else if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        AuthHelper.showToast(data.message || 'Error', 'danger');
+                    }
+                },
+                error: function() {
+                    AuthHelper.showToast('Something went wrong', 'danger');
+                }
+            });
         }
+
+        // Add to Guest Cart
+        function addToGuestCart(productId, qty) {
+            qty = qty || 1;
+            $.ajax({
+                url: '/user/guest/cart/add',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify({
+                    productId: productId,
+                    quantity: qty
+                }),
+                success: function(data) {
+                    if (data.success) {
+                        AuthHelper.showToast('Added to cart (Guest)!', 'success');
+                        AuthHelper.updateCartCount(data.cartCount);
+                    } else {
+                        AuthHelper.showToast(data.message || 'Error', 'danger');
+                    }
+                },
+                error: function() {
+                    AuthHelper.showToast('Something went wrong', 'danger');
+                }
+            });
+        }
+
+        // Toggle Wishlist
+        function toggleWishlist(productId, element) {
+            if (!AuthHelper.isAuthenticated()) {
+                AuthHelper.showLoginPrompt('add to wishlist');
+                return;
+            }
+            $.ajax({
+                url: '/user/wishlist/toggle',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify({
+                    productId: productId
+                }),
+                success: function(data) {
+                    if (data.success) {
+                        var icon = $(element).find('i');
+                        if (data.inWishlist) {
+                            icon.removeClass('fa-regular').addClass('fa-solid');
+                            $(element).attr('title', 'Remove from Wishlist');
+                        } else {
+                            icon.removeClass('fa-solid').addClass('fa-regular');
+                            $(element).attr('title', 'Add to Wishlist');
+                        }
+                        AuthHelper.updateWishlistCount(data.wishlistCount);
+                        AuthHelper.showToast(data.message, 'success');
+                    } else {
+                        AuthHelper.showToast(data.message || 'Error', 'danger');
+                    }
+                },
+                error: function() {
+                    AuthHelper.showToast('Something went wrong', 'danger');
+                }
+            });
+        }
+
+        // Submit Rating
+        function submitRating(productId, rating) {
+            if (!AuthHelper.isAuthenticated()) {
+                AuthHelper.showLoginPrompt('rate this product');
+                return;
+            }
+            $.ajax({
+                url: '/user/rating',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify({
+                    productId: productId,
+                    productRating: rating
+                }),
+                success: function(data) {
+                    if (data.success) {
+                        AuthHelper.showToast('Thanks for rating!', 'success');
+                        location.reload();
+                    } else if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        AuthHelper.showToast(data.message || 'Error', 'danger');
+                    }
+                },
+                error: function() {
+                    AuthHelper.showToast('Something went wrong', 'danger');
+                }
+            });
+        }
+
+        // Submit Comment
+        function submitComment(form) {
+            if (!AuthHelper.isAuthenticated()) {
+                AuthHelper.showLoginPrompt('post a comment');
+                return;
+            }
+            var formData = new FormData(form);
+            $.ajax({
+                url: '/user/create/comment',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    if (data.success) {
+                        AuthHelper.showToast('Comment posted!', 'success');
+                        location.reload();
+                    } else if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        AuthHelper.showToast(data.message || 'Error', 'danger');
+                    }
+                },
+                error: function() {
+                    AuthHelper.showToast('Something went wrong', 'danger');
+                }
+            });
+        }
+
+        // Initialize on page load
+        $(document).ready(function() {
+            // Auto-show toasts from session
+            $('.toast').each(function() {
+                var toast = new bootstrap.Toast(this, {
+                    delay: 3000
+                });
+                toast.show();
+            });
+        });
     </script>
+
+    @yield('js-script')
 </body>
 
 </html>

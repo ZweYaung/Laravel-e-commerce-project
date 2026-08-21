@@ -4,11 +4,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialLoginController;
 
+// All user routes will be prefixed with /user
+Route::group(['prefix' => 'user'], function () {
+    require_once __DIR__.'/user.php';
+});
+
 require_once __DIR__.'/admin.php';
-require_once __DIR__.'/user.php';
 
-
-Route::redirect('/','login');
+// Redirect root to /user/home
+Route::redirect('/', '/user/home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -20,9 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-//social login
-Route::get('/auth/{provider}/redirect',[SocialLoginController::class,'redirect'])->name('social#login');
-
-Route::get('/auth/{provider}/callback',[SocialLoginController::class,'callBack'])->name('social#callBack');
+// Social login
+Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])->name('social#login');
+Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callBack'])->name('social#callBack');
 
 require __DIR__.'/auth.php';
