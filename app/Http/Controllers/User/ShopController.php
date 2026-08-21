@@ -58,7 +58,7 @@ class ShopController extends Controller
     ->leftJoin('users', 'users.id', 'comments.user_id')
     ->leftJoin('ratings', function ($join) {
         $join->on('ratings.user_id', '=', 'comments.user_id')
-             ->on('ratings.product_id', '=', 'comments.product_id'); // ✅ FIX HERE
+             ->on('ratings.product_id', '=', 'comments.product_id');
     })
     ->orderBy('comments.created_at', 'desc')
     ->get();
