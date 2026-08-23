@@ -5,9 +5,7 @@
     <section id="billboard" class="bg-light py-5">
         <div class="container">
             <div class="row justify-content-center">
-                <h1 class="section-title text-center mt-4" data-aos="fade-up">
-                    New Collections
-                </h1>
+                <h1 class="section-title text-center mt-4" data-aos="fade-up">New Collections</h1>
                 <div class="col-md-6 text-center" data-aos="fade-up" data-aos-delay="300">
                     <p>
                         Discover our latest arrivals, where modern style meets unbeatable comfort.
@@ -30,15 +28,12 @@
                                                 class="img-fluid w-100 object-fit-cover" style="height: 100%;">
                                         </a>
                                     </div>
-
                                     <div class="banner-content py-4 px-2 px-sm-3 px-md-0">
                                         <h5 class="element-title text-uppercase">
                                             <a href="{{ route('shop#productDetails', $item->id) }}"
                                                 class="item-anchor">{{ $item->name }}</a>
                                         </h5>
-                                        <p>
-                                            {{ Str::limit($item->description, 70, '...') }}
-                                        </p>
+                                        <p>{{ Str::limit($item->description, 70, '...') }}</p>
                                         <div class="btn-left">
                                             <a href="{{ route('shop#productDetails', $item->id) }}"
                                                 class="btn-link fs-6 text-uppercase item-anchor text-decoration-none">Discover
@@ -55,13 +50,11 @@
                     style="width: 100px; height: 100px;">
                     <i class="fa-solid fa-arrow-left"></i>
                 </div>
-
                 <div class="icon-arrow icon-arrow-right d-none d-md-inline-flex align-items-center justify-content-center p-2"
                     style="width: 100px; height: 100px;">
                     <i class="fa-solid fa-arrow-right"></i>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -71,11 +64,9 @@
                 <div class="col-md-3 text-center" data-aos="fade-in" data-aos-delay="0">
                     <div class="py-5">
                         <svg width="38" height="38" viewBox="0 0 24 24">
-                            <use mdink:href="#calendar"></use>
+                            <use xlink:href="#calendar"></use>
                         </svg>
-                        <h4 class="element-title text-capitalize my-3">
-                            Book An Appointment
-                        </h4>
+                        <h4 class="element-title text-capitalize my-3">Book An Appointment</h4>
                     </div>
                 </div>
                 <div class="col-md-3 text-center" data-aos="fade-in" data-aos-delay="300">
@@ -83,9 +74,7 @@
                         <svg width="38" height="38" viewBox="0 0 24 24">
                             <use xlink:href="#shopping-bag"></use>
                         </svg>
-                        <h4 class="element-title text-capitalize my-3">
-                            Pick up in store
-                        </h4>
+                        <h4 class="element-title text-capitalize my-3">Pick up in store</h4>
                     </div>
                 </div>
                 <div class="col-md-3 text-center" data-aos="fade-in" data-aos-delay="600">
@@ -93,9 +82,7 @@
                         <svg width="38" height="38" viewBox="0 0 24 24">
                             <use xlink:href="#gift"></use>
                         </svg>
-                        <h4 class="element-title text-capitalize my-3">
-                            Special packaging
-                        </h4>
+                        <h4 class="element-title text-capitalize my-3">Special packaging</h4>
                     </div>
                 </div>
                 <div class="col-md-3 text-center" data-aos="fade-in" data-aos-delay="900">
@@ -103,9 +90,7 @@
                         <svg width="38" height="38" viewBox="0 0 24 24">
                             <use xlink:href="#arrow-cycle"></use>
                         </svg>
-                        <h4 class="element-title text-capitalize my-3">
-                            free global returns
-                        </h4>
+                        <h4 class="element-title text-capitalize my-3">free global returns</h4>
                     </div>
                 </div>
             </div>
@@ -130,29 +115,25 @@
                                             style="height: 400px; overflow: hidden;" />
                                     </a>
                                     @php
-                                        $isInWishlist = $wishlistItems->firstWhere('product_id', $item->id);
+                                        $isInWishlist =
+                                            Auth::check() && $wishlistItems->firstWhere('product_id', $item->id);
                                     @endphp
-
-
-                                    @if ($isInWishlist)
-                                        <a href="{{ route('wishlist#remove', $isInWishlist->id) }}"
-                                            title="Remove from Wishlist" class="btn-icon btn-wishlist"><i
-                                                class="fa-solid fa-heart"></i></a>
-                                    @else
-                                        <a href="{{ route('wishlist#add', $item->id) }}" title="Add to Wishlist"
-                                            class="btn-icon btn-wishlist">
-                                            <i class="fa-regular fa-heart"></i>
-                                        </a>
-                                    @endif
+                                    <a href="#"
+                                        title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                                        class="btn-icon btn-wishlist wishlist-toggle"
+                                        data-product-id="{{ $item->id }}">
+                                        <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                    </a>
                                     <div class="product-content">
                                         <h5 class="element-title text-uppercase fs-5 mt-3">
                                             <a
                                                 href="{{ route('shop#productDetails', $item->id) }}">{{ $item->name }}</a>
                                         </h5>
-                                        <a href="{{ route('user#addToCartGet', $item->id) }}"
-                                            class="text-decoration-none"
-                                            data-after="Add to cart"><span>{{ number_format($item->price) }}
-                                                MMK</span></a>
+                                        <a href="#" class="text-decoration-none add-to-cart-home"
+                                            data-product-id="{{ $item->id }}" data-qty="1"
+                                            data-after="Add to cart">
+                                            <span>{{ number_format($item->price) }} MMK</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -161,12 +142,11 @@
                 </div>
                 <div class="swiper-pagination"></div>
             </div>
-            <div class="icon-arrow icon-arrow-left  d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
+            <div class="icon-arrow icon-arrow-left d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
                 style="width: 70px; height: 70px;">
                 <i class="fa-solid fa-arrow-left"></i>
             </div>
-
-            <div class="icon-arrow icon-arrow-right  d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
+            <div class="icon-arrow icon-arrow-right d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
                 style="width: 70px; height: 70px;">
                 <i class="fa-solid fa-arrow-right"></i>
             </div>
@@ -191,29 +171,25 @@
                                             style="height: 400px; overflow: hidden;" />
                                     </a>
                                     @php
-                                        $isInWishlist = $wishlistItems->firstWhere('product_id', $item->id);
+                                        $isInWishlist =
+                                            Auth::check() && $wishlistItems->firstWhere('product_id', $item->id);
                                     @endphp
-
-
-                                    @if ($isInWishlist)
-                                        <a href="{{ route('wishlist#remove', $isInWishlist->id) }}"
-                                            title="Remove from Wishlist" class="btn-icon btn-wishlist"><i
-                                                class="fa-solid fa-heart"></i></a>
-                                    @else
-                                        <a href="{{ route('wishlist#add', $item->id) }}" title="Add to Wishlist"
-                                            class="btn-icon btn-wishlist">
-                                            <i class="fa-regular fa-heart"></i>
-                                        </a>
-                                    @endif
+                                    <a href="#"
+                                        title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                                        class="btn-icon btn-wishlist wishlist-toggle"
+                                        data-product-id="{{ $item->id }}">
+                                        <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                    </a>
                                     <div class="product-content">
                                         <h5 class="element-title text-uppercase fs-5 mt-3">
                                             <a
                                                 href="{{ route('shop#productDetails', $item->id) }}">{{ $item->name }}</a>
                                         </h5>
-                                        <a href="{{ route('user#addToCartGet', $item->id) }}"
-                                            class="text-decoration-none"
-                                            data-after="Add to cart"><span>{{ number_format($item->price) }}
-                                                MMK</span></a>
+                                        <a href="#" class="text-decoration-none add-to-cart-home"
+                                            data-product-id="{{ $item->id }}" data-qty="1"
+                                            data-after="Add to cart">
+                                            <span>{{ number_format($item->price) }} MMK</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -222,12 +198,11 @@
                 </div>
                 <div class="swiper-pagination"></div>
             </div>
-            <div class="icon-arrow icon-arrow-left  d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
+            <div class="icon-arrow icon-arrow-left d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
                 style="width: 70px; height: 70px;">
                 <i class="fa-solid fa-arrow-left"></i>
             </div>
-
-            <div class="icon-arrow icon-arrow-right  d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
+            <div class="icon-arrow icon-arrow-right d-none d-xxl-inline-flex align-items-center justify-content-center p-2"
                 style="width: 70px; height: 70px;">
                 <i class="fa-solid fa-arrow-right"></i>
             </div>

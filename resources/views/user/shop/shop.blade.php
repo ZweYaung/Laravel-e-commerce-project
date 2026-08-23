@@ -4,9 +4,7 @@
     <section id="billboard" class="bg-light py-5">
         <div class="container">
             <div class="row justify-content-center">
-                <h1 class="section-title text-center mt-4" data-aos="fade-up">
-                    SHOP
-                </h1>
+                <h1 class="section-title text-center mt-4" data-aos="fade-up">SHOP</h1>
                 <div class="col-md-6 text-center" data-aos="fade-up" data-aos-delay="300">
                     <p>BROWSE AS YOU WANT, BUY AS YOU WISH</p>
                 </div>
@@ -15,13 +13,7 @@
     </section>
 
     <div class="container-fluid pt-5">
-        <div class="row d-flex justify-content-end align-items-center p-3">
-            <div class="col-auto">
-                <!-- Toast messages will now be handled by JS -->
-            </div>
-        </div>
         <div class="row px-xl-5 d-flex justify-content-center">
-            <!-- Shop Product Start -->
             <div class="col-12">
                 <div class="row pb-3">
                     <div class="col-12 pb-1">
@@ -32,15 +24,12 @@
                                         class="fa-solid fa-arrows-rotate align-middle"></i></a>
                                 <input class="form-control me-2" value="{{ request('searchKey') }}" name="searchKey"
                                     type="search" placeholder="Search" aria-label="Search" />
-                                <button class="btn btn-outline-dark rounded" type="submit">
-                                    Search
-                                </button>
+                                <button class="btn btn-outline-dark rounded" type="submit">Search</button>
                             </form>
 
                             <li class="dropdown">
                                 <a class="dropdown-toggle btn" href="#" id="dropdownHome" data-bs-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
-
                                     @php
                                         $sortText = 'Sort by';
                                         if ($action == 'oldest') {
@@ -53,29 +42,19 @@
                                             $sortText = 'Price: High to Low';
                                         }
                                     @endphp
-
                                     {{ $sortText }}
                                 </a>
                                 <ul class="dropdown-menu list-unstyled" aria-labelledby="dropdownHome">
-                                    <li>
-                                        <a href="{{ route('user#shop') }}" class="dropdown-item item-anchor">Default -
-                                            Latest</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('user#shop', 'oldest') }}"
-                                            class="dropdown-item item-anchor">Oldest</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('user#shop', 'priceLowToHigh') }}"
-                                            class="dropdown-item item-anchor">Price: Low to High</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('user#shop', 'priceHighToLow') }}"
-                                            class="dropdown-item item-anchor">Price: High to Low</a>
-                                    </li>
+                                    <li><a href="{{ route('user#shop') }}" class="dropdown-item item-anchor">Default -
+                                            Latest</a></li>
+                                    <li><a href="{{ route('user#shop', 'oldest') }}"
+                                            class="dropdown-item item-anchor">Oldest</a></li>
+                                    <li><a href="{{ route('user#shop', 'priceLowToHigh') }}"
+                                            class="dropdown-item item-anchor">Price: Low to High</a></li>
+                                    <li><a href="{{ route('user#shop', 'priceHighToLow') }}"
+                                            class="dropdown-item item-anchor">Price: High to Low</a></li>
                                 </ul>
                             </li>
-
                         </div>
                     </div>
 
@@ -83,7 +62,6 @@
                         @foreach ($products as $item)
                             <div class="col-lg-3 col-md-6 col-sm-12 pb-1 mb-5">
                                 <div class="card product-item border-0 mb-4 image-zoom-effect d-flex flex-column h-100">
-                                    <!-- Image -->
                                     <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0"
                                         style="height: 400px;">
                                         <a href="{{ route('shop#productDetails', $item->id) }}">
@@ -97,43 +75,29 @@
                                                 Auth::check() && $wishlistItems->firstWhere('product_id', $item->id);
                                         @endphp
 
-                                        @auth
-                                            <a href="#"
-                                                title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
-                                                class="btn-icon btn-wishlist wishlist-toggle"
-                                                data-product-id="{{ $item->id }}">
-                                                <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
-                                            </a>
-                                        @else
-                                            <a href="#" title="Add to Wishlist" class="btn-icon btn-wishlist"
-                                                onclick="AuthHelper.showLoginPrompt('add to wishlist'); return false;">
-                                                <i class="fa-regular fa-heart"></i>
-                                            </a>
-                                        @endauth
-
+                                        {{-- Wishlist toggle – global handler will check auth --}}
+                                        <a href="#"
+                                            title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                                            class="btn-icon btn-wishlist wishlist-toggle"
+                                            data-product-id="{{ $item->id }}">
+                                            <i class="{{ $isInWishlist ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                        </a>
                                     </div>
 
                                     <div class="card-body border-left border-right text-center p-2">
                                         <h6 class="mb-2" style="white-space: normal; word-wrap: break-word;">
-                                            {{ $item->name }}
-                                        </h6>
+                                            {{ $item->name }}</h6>
                                         <div class="d-flex justify-content-center">
                                             <h6 class="m-0">{{ number_format($item->price) }} MMK</h6>
                                         </div>
                                     </div>
 
                                     <div class="card-footer d-flex justify-content-center bg-light border mt-auto">
-                                        @auth
-                                            <button class="btn btn-sm text-dark p-0 add-to-cart-btn"
-                                                data-product-id="{{ $item->id }}" data-qty="1">
-                                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
-                                            </button>
-                                        @else
-                                            <button class="btn btn-sm text-dark p-0"
-                                                onclick="AuthHelper.showLoginPrompt('add items to cart'); return false;">
-                                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
-                                            </button>
-                                        @endauth
+                                        {{-- Add to Cart – global handler will check auth --}}
+                                        <button class="btn btn-sm text-dark p-0 add-to-cart-btn"
+                                            data-product-id="{{ $item->id }}" data-qty="1">
+                                            <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -148,40 +112,6 @@
                     <span class="d-flex justify-content-center">{{ $products->links() }}</span>
                 </div>
             </div>
-            <!-- Shop Product End -->
         </div>
     </div>
-@endsection
-
-@section('js-script')
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Add to Cart buttons
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productId = this.dataset.productId;
-                    const qty = this.dataset.qty || 1;
-                    if (AuthHelper.isAuthenticated()) {
-                        addToCart(productId, qty);
-                    } else {
-                        AuthHelper.showLoginPrompt('add items to cart');
-                    }
-                });
-            });
-
-            // Wishlist toggle buttons
-            document.querySelectorAll('.wishlist-toggle').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productId = this.dataset.productId;
-                    if (AuthHelper.isAuthenticated()) {
-                        toggleWishlist(productId, this);
-                    } else {
-                        AuthHelper.showLoginPrompt('add to wishlist');
-                    }
-                });
-            });
-        });
-    </script>
 @endsection

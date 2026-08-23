@@ -10,7 +10,7 @@
     {{-- CSRF Token --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- Auth status meta tags --}}
+    {{-- Auth status --}}
     @auth
         <meta name="user-id" content="{{ auth()->id() }}">
         <meta name="user-authenticated" content="true">
@@ -18,7 +18,7 @@
         <meta name="user-authenticated" content="false">
     @endauth
 
-    {{-- bootstrap cdn link --}}
+    {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
 
@@ -27,7 +27,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('user/css/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('user/css/custom.css') }}" />
 
-    {{-- font awesome cdn link --}}
+    {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
         integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -40,75 +40,49 @@
 </head>
 
 <body class="homepage">
-    <!-- Offcanvas Wishlist -->
+
+    {{-- Offcanvas Wishlist --}}
     <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart"
         aria-labelledby="My Cart">
-        <div class="offcanvas-header justify-content-center"> <button type="button" class="btn-close"
-                data-bs-dismiss="offcanvas" aria-label="Close"></button> </div>
-
+        <div class="offcanvas-header justify-content-center">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
         <div class="offcanvas-body">
             <div class="order-md-last">
-                <h4 class="d-flex justify-content-between align-items-center mb-3"> <span class="text-primary">Your
-                        Wishlist</span> <span class="badge bg-primary rounded-pill wish-count-badge">
-                        @auth
-                            {{ $wishlistItems->count() ?? 0 }}
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Your Wishlist</span>
+                    <span class="badge bg-primary rounded-pill wish-count-badge">
+                        @auth {{ $wishlistItems->count() ?? 0 }}
                         @else
-                            0
-                        @endauth
+                        0 @endauth
                     </span>
                 </h4>
-                <ul class="list-group mb-3 wishlist-items">
-                    @auth
-                        @forelse($wishlistItems as $item)
-                            <form action="{{ route('user#addToCart') }}" method="post"> @csrf <li
-                                    class="list-group-item d-flex justify-content-between lh-sm">
-                                    <div class="d-flex justify-center"> <a href="{{ route('wishlist#remove', $item->id) }}"
-                                            class="d-flex align-items-center"> <i
-                                                class="fa-solid fa-xmark text-primary"></i> </a>
-                                        <div class="ms-2"> <a
-                                                href="{{ route('shop#productDetails', $item->product->id) }}"
-                                                title="See the product's details">
-                                                <h6 class="my-0">{{ $item->product->name }}</h6>
-                                            </a> <small
-                                                class="text-body-secondary">{{ number_format($item->product->price) }}
-                                                MMK</small> </div>
-                                    </div> <input type="hidden" name="userId" value="{{ Auth::user()->id }}"> <input
-                                        type="hidden" name="productId" value="{{ $item->product->id }}"> <input
-                                        type="hidden" name="qty" value="1"> <button type="submit"
-                                        title="Add to Cart" class="border-0 bg-transparent"> <i
-                                            class="fa-solid fa-cart-plus text-primary"></i>
-                                    </button>
-                                </li>
-                        </form> @empty <li class="list-group-item text-center text-muted"> No items in wishlist
-                            </li>
-                        @endforelse
-                    @else
-                        <li class="list-group-item text-center text-muted">
-                            <a href="{{ route('login') }}?redirect={{ url()->current() }}">Log in</a> to see your
-                            wishlist.
-                        </li>
-                    @endauth
+
+                <ul class="list-group mb-3 wishlist-items" id="wishlistOffcanvasList">
+                    @include('partials.wishlist-offcanvas-items')
                 </ul>
             </div>
         </div>
-
     </div>
 
-    <!-- Navbar -->
+    {{-- Navbar --}}
     <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
         <div class="container-fluid">
             <div class="row justify-content-between align-items-center w-100">
                 <div class="col-auto">
-                    <h1 class="fs-4 text-center mt-4"> STYLEHUB </h1>
+                    <h1 class="fs-4 text-center mt-4">STYLEHUB</h1>
                 </div>
-                <div class="col-auto"> <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar"> <span
-                            class="navbar-toggler-icon"></span> </button>
+                <div class="col-auto">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
                         aria-labelledby="offcanvasNavbarLabel">
                         <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5> <button type="button"
-                                class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+                            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
                         </div>
                         <div class="offcanvas-body">
                             <ul class="navbar-nav justify-content-end flex-grow-1 gap-1 gap-md-5 pe-3">
@@ -128,18 +102,14 @@
                                     <a class="nav-link {{ request()->routeIs('user#contact') ? 'active fw-semi-bold' : '' }}"
                                         href="{{ route('user#contact') }}">Contact</a>
                                 </li>
-
-                                <!-- Small screen Cart, Wishlist, Profile -->
                                 <li class="nav-item d-lg-none mt-2">
-                                    <a class="nav-link" href="{{ route('user#cart') }}">Cart <span
-                                            class="cart-count">(
+                                    <a class="nav-link" href="{{ route('user#cart') }}">Cart <span class="cart-count">(
                                             {{ $cartCount ?? 0 }} )</span></a>
                                 </li>
                                 <li class="nav-item d-lg-none">
                                     <a class="nav-link" href="#" data-bs-toggle="offcanvas"
-                                        data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">Wishlist <span
-                                            class="wish-count">(
-                                            @auth {{ $wishlistItems->count() ?? 0 }}
+                                        data-bs-target="#offcanvasCart">Wishlist <span class="wish-count">( @auth
+                                                {{ $wishlistItems->count() ?? 0 }}
                                             @else
                                             0 @endauth )</span></a>
                                 </li>
@@ -156,12 +126,18 @@
                                             <li><a class="dropdown-item" href="{{ route('user#editPage') }}">Profile</a>
                                             </li>
                                             @if (Auth::user()->password)
-                                                <li><a class="dropdown-item"
-                                                        href="{{ route('user#changePasswordPage') }}">Change Password</a>
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('user#changePasswordPage') }}">
+                                                        Change Password
+                                                    </a>
                                                 </li>
                                             @endif
-                                            <li><a class="dropdown-item" href="{{ route('user#orderList') }}">Order
-                                                    List</a></li>
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('user#orderList') }}">
+                                                    Order List
+                                                </a>
+                                            </li>
                                             <li>
                                                 <form action="{{ route('logout') }}" method="post">
                                                     @csrf
@@ -170,6 +146,17 @@
                                             </li>
                                         </ul>
                                     </li>
+                                @else
+                                    <li class="nav-item d-lg-none mt-2">
+                                        <a class="nav-link" href="{{ route('login') }}?redirect={{ url()->current() }}">
+                                            Login
+                                        </a>
+                                    </li>
+                                    <li class="nav-item d-lg-none">
+                                        <a class="nav-link" href="{{ route('register') }}">
+                                            Register
+                                        </a>
+                                    </li>
                                 @endauth
                             </ul>
                         </div>
@@ -177,37 +164,42 @@
                 </div>
                 <div class="col-auto col-lg-auto">
                     <ul class="list-unstyled d-flex m-0">
-                        <li class="d-none d-lg-block"> <a href="{{ route('user#cart') }}"
-                                class="text-uppercase mx-3">Cart <span class="cart-count">( <span
-                                        id="cartCount">{{ $cartCount ?? 0 }}</span> )</span> </a> </li>
-                        <li class="d-none d-lg-block"> <a href="#" class="text-uppercase mx-3"
-                                data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                                aria-controls="offcanvasCart">Wishlist <span class="wish-count">( <span
+                        <li class="d-none d-lg-block">
+                            <a href="{{ route('user#cart') }}" class="text-uppercase mx-3">Cart <span
+                                    class="cart-count">( <span id="cartCount">{{ $cartCount ?? 0 }}</span>
+                                    )</span></a>
+                        </li>
+                        <li class="d-none d-lg-block">
+                            <a href="#" class="text-uppercase mx-3" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasCart">Wishlist <span class="wish-count">( <span
                                         id="wishlistCount">@auth {{ $wishlistItems->count() ?? 0 }}
                                         @else
                                         0 @endauth
-                                    </span> )</span> </a> </li>
+                                    </span> )</span></a>
+                        </li>
                         @auth
-                            <li class="d-none d-lg-block dropdown"> <a class="dropdown-toggle" href="#"
-                                    id="dropdownHome" data-bs-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false"> <img
-                                        src="{{ Auth::user()->image != null ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                            <li class="d-none d-lg-block dropdown">
+                                <a class="dropdown-toggle" href="#" id="dropdownHome" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                    <img src="{{ Auth::user()->image != null ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
                                         class="img-profile rounded-circle" style="height: 28px; width: 28px"
                                         alt="">
                                     <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">
-                                    <li> <a href="{{ route('user#editPage') }}"
-                                            class="dropdown-item item-anchor">Profile</a> </li>
+                                    <li><a href="{{ route('user#editPage') }}"
+                                            class="dropdown-item item-anchor">Profile</a></li>
                                     @if (Auth::user()->password)
-                                        <li> <a href="{{ route('user#changePasswordPage') }}"
-                                                class="dropdown-item item-anchor">Change Password</a> </li>
+                                        <li><a href="{{ route('user#changePasswordPage') }}"
+                                                class="dropdown-item item-anchor">Change Password</a></li>
                                     @endif
-                                    <li> <a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
-                                            List</a> </li>
+                                    <li><a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
+                                            List</a></li>
                                     <li>
-                                        <form action="{{ route('logout') }}" method="post"> @csrf <input type="submit"
-                                                class="dropdown-item item-anchor" value="LOGOUT"> </form>
+                                        <form action="{{ route('logout') }}" method="post">
+                                            @csrf
+                                            <input type="submit" class="dropdown-item item-anchor" value="LOGOUT">
+                                        </form>
                                     </li>
                                 </ul>
                             </li>
@@ -226,39 +218,40 @@
 
     @yield('content')
 
+    {{-- Footer --}}
     <footer id="footer" class="mt-5">
         <div class="container">
             <div class="row d-flex flex-wrap justify-content-between py-5">
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-menu footer-menu-001">
                         <div class="footer-intro mb-4">
-                            <h1 class="fs-4 text-center mt-4"> STYLEHUB </h1>
+                            <h1 class="fs-4 text-center mt-4">STYLEHUB</h1>
                         </div>
-                        <p> Every piece we design is made with love, attention to detail, and a commitment to quality.
-                            We take pride in blending timeless style with modern trends, making fashion accessible and
-                            empowering for all. </p>
+                        <p>Every piece we design is made with love, attention to detail, and a commitment to quality. We
+                            take pride in blending timeless style with modern trends, making fashion accessible and
+                            empowering for all.</p>
                         <div class="social-links">
                             <ul class="list-unstyled d-flex flex-wrap gap-3">
-                                <li> <a href="#" class="text-secondary"> <svg width="24" height="24"
+                                <li><a href="#" class="text-secondary"><svg width="24" height="24"
                                             viewBox="0 0 24 24">
                                             <use xlink:href="#facebook"></use>
-                                        </svg> </a> </li>
-                                <li> <a href="#" class="text-secondary"> <svg width="24" height="24"
+                                        </svg></a></li>
+                                <li><a href="#" class="text-secondary"><svg width="24" height="24"
                                             viewBox="0 0 24 24">
                                             <use xlink:href="#twitter"></use>
-                                        </svg> </a> </li>
-                                <li> <a href="#" class="text-secondary"> <svg width="24" height="24"
+                                        </svg></a></li>
+                                <li><a href="#" class="text-secondary"><svg width="24" height="24"
                                             viewBox="0 0 24 24">
                                             <use xlink:href="#youtube"></use>
-                                        </svg> </a> </li>
-                                <li> <a href="#" class="text-secondary"> <svg width="24" height="24"
+                                        </svg></a></li>
+                                <li><a href="#" class="text-secondary"><svg width="24" height="24"
                                             viewBox="0 0 24 24">
                                             <use xlink:href="#pinterest"></use>
-                                        </svg> </a> </li>
-                                <li> <a href="#" class="text-secondary"> <svg width="24" height="24"
+                                        </svg></a></li>
+                                <li><a href="#" class="text-secondary"><svg width="24" height="24"
                                             viewBox="0 0 24 24">
                                             <use xlink:href="#instagram"></use>
-                                        </svg> </a> </li>
+                                        </svg></a></li>
                             </ul>
                         </div>
                     </div>
@@ -267,15 +260,15 @@
                     <div class="footer-menu footer-menu-002">
                         <h5 class="widget-title text-uppercase mb-4">Quick Links</h5>
                         <ul class="menu-list list-unstyled text-uppercase border-animation-left fs-6">
-                            <li class="menu-item"> <a href="{{ route('user#home') }}" class="item-anchor">Home</a>
+                            <li class="menu-item"><a href="{{ route('user#home') }}" class="item-anchor">Home</a>
                             </li>
-                            <li class="menu-item"> <a href="{{ route('user#about') }}" class="item-anchor">About</a>
+                            <li class="menu-item"><a href="{{ route('user#about') }}" class="item-anchor">About</a>
                             </li>
-                            <li class="menu-item"> <a href="{{ route('user#shop') }}" class="item-anchor">Shop</a>
+                            <li class="menu-item"><a href="{{ route('user#shop') }}" class="item-anchor">Shop</a>
                             </li>
-                            <li class="menu-item"> <a href="{{ route('user#contact') }}"
-                                    class="item-anchor">Contact</a> </li>
-                            <li class="menu-item"> <a href="{{ route('user#cart') }}" class="item-anchor">Cart</a>
+                            <li class="menu-item"><a href="{{ route('user#contact') }}"
+                                    class="item-anchor">Contact</a></li>
+                            <li class="menu-item"><a href="{{ route('user#cart') }}" class="item-anchor">Cart</a>
                             </li>
                         </ul>
                     </div>
@@ -284,29 +277,26 @@
                     <div class="footer-menu footer-menu-003">
                         <h5 class="widget-title text-uppercase mb-4">Help & Info</h5>
                         <ul class="menu-list list-unstyled text-uppercase border-animation-left fs-6">
-                            <li class="menu-item"> <a href="#" class="item-anchor">Track Your Order</a> </li>
-                            <li class="menu-item"> <a href="#" class="item-anchor">Returns + Exchanges</a>
-                            </li>
-                            <li class="menu-item"> <a href="#" class="item-anchor">Shipping + Delivery</a>
-                            </li>
-                            <li class="menu-item"> <a href="#" class="item-anchor">Contact Us</a> </li>
-                            <li class="menu-item"> <a href="#" class="item-anchor">Find us easy</a> </li>
-                            <li class="menu-item"> <a href="index.html" class="item-anchor">Faqs</a> </li>
+                            <li class="menu-item"><a href="#" class="item-anchor">Track Your Order</a></li>
+                            <li class="menu-item"><a href="#" class="item-anchor">Returns + Exchanges</a></li>
+                            <li class="menu-item"><a href="#" class="item-anchor">Shipping + Delivery</a></li>
+                            <li class="menu-item"><a href="#" class="item-anchor">Contact Us</a></li>
+                            <li class="menu-item"><a href="#" class="item-anchor">Find us easy</a></li>
+                            <li class="menu-item"><a href="index.html" class="item-anchor">Faqs</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-menu footer-menu-004 border-animation-left">
                         <h5 class="widget-title text-uppercase mb-4">Contact Us</h5>
-                        <p> Do you have any questions or suggestions? <a href="#"
-                                class="item-anchor">cos209@gmail.com</a> </p>
-                        <p> Do you need support? Give us a call. <a href="tel:+43 720 11 52 78"
-                                class="item-anchor">+95 78123459</a> </p>
+                        <p>Do you have any questions or suggestions? <a href="#"
+                                class="item-anchor">cos209@gmail.com</a></p>
+                        <p>Do you need support? Give us a call. <a href="tel:+43 720 11 52 78" class="item-anchor">+95
+                                78123459</a></p>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Footer Bottom - Replaced with proper copyright -->
         <div class="border-top py-4">
             <div class="container">
                 <div class="row">
@@ -320,10 +310,8 @@
         </div>
     </footer>
 
-    {{-- Toast Container --}}
+    {{-- Toast & Modal --}}
     <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-
-    {{-- Login Required Modal --}}
     <div class="modal fade" id="loginRequiredModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -335,12 +323,9 @@
                     <p id="loginModalMessage">Please log in to perform this action.</p>
                     <div class="mt-3">
                         <div class="d-grid gap-2">
-                            <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-primary">
-                                Log In
-                            </a>
-                            <a href="{{ route('register') }}" class="btn btn-outline-secondary">
-                                Create Account
-                            </a>
+                            <a href="{{ route('login') }}?redirect={{ url()->current() }}"
+                                class="btn btn-primary">Log In</a>
+                            <a href="{{ route('register') }}" class="btn btn-outline-secondary">Create Account</a>
                         </div>
                     </div>
                 </div>
@@ -360,236 +345,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="{{ asset('user/js/script.min.js') }}"></script>
     <script src="{{ asset('user/js/main.js') }}"></script>
-
-    {{-- Auth Helper & AJAX functions using jQuery --}}
-    <script>
-        // Auth Helper object for checking authentication status
-        var AuthHelper = {
-            isAuthenticated: function() {
-                return $('meta[name="user-authenticated"]').attr('content') === 'true';
-            },
-            getUserId: function() {
-                return $('meta[name="user-id"]').attr('content');
-            },
-            showLoginPrompt: function(action) {
-                action = action || 'perform this action';
-                $('#loginModalMessage').text('Please log in to ' + action);
-                var modal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
-                modal.show();
-            },
-            showToast: function(message, type) {
-                type = type || 'info';
-                var container = $('#toastContainer');
-                if (container.length === 0) {
-                    $('body').append(
-                        '<div id="toastContainer" style="position:fixed;top:20px;right:20px;z-index:9999;"></div>'
-                        );
-                    container = $('#toastContainer');
-                }
-                var toast = $('<div class="alert alert-' + type +
-                    ' alert-dismissible fade show" role="alert" style="min-width:250px;margin-bottom:10px;">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
-                    );
-                container.append(toast);
-                setTimeout(function() {
-                    toast.remove();
-                }, 5000);
-            },
-            updateCartCount: function(count) {
-                $('#cartCount').text(count);
-                $('.cart-count').each(function() {
-                    $(this).text('( ' + count + ' )');
-                });
-            },
-            updateWishlistCount: function(count) {
-                $('#wishlistCount').text(count);
-                $('.wish-count').each(function() {
-                    $(this).text('( ' + count + ' )');
-                });
-                $('.wish-count-badge').text(count);
-            }
-        };
-
-        // AJAX Functions using jQuery
-
-        // Add to Cart for logged-in users
-        function addToCart(productId, qty) {
-            qty = qty || 1;
-            if (!AuthHelper.isAuthenticated()) {
-                AuthHelper.showLoginPrompt('add items to cart');
-                return;
-            }
-            $.ajax({
-                url: '/user/add/cart',
-                type: 'POST',
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: JSON.stringify({
-                    userId: AuthHelper.getUserId(),
-                    productId: productId,
-                    qty: qty
-                }),
-                success: function(data) {
-                    if (data.success) {
-                        AuthHelper.showToast('Added to cart!', 'success');
-                        AuthHelper.updateCartCount(data.cartCount);
-                    } else if (data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
-                        AuthHelper.showToast(data.message || 'Error', 'danger');
-                    }
-                },
-                error: function() {
-                    AuthHelper.showToast('Something went wrong', 'danger');
-                }
-            });
-        }
-
-        // Add to Guest Cart
-        function addToGuestCart(productId, qty) {
-            qty = qty || 1;
-            $.ajax({
-                url: '/user/guest/cart/add',
-                type: 'POST',
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: JSON.stringify({
-                    productId: productId,
-                    quantity: qty
-                }),
-                success: function(data) {
-                    if (data.success) {
-                        AuthHelper.showToast('Added to cart (Guest)!', 'success');
-                        AuthHelper.updateCartCount(data.cartCount);
-                    } else {
-                        AuthHelper.showToast(data.message || 'Error', 'danger');
-                    }
-                },
-                error: function() {
-                    AuthHelper.showToast('Something went wrong', 'danger');
-                }
-            });
-        }
-
-        // Toggle Wishlist
-        function toggleWishlist(productId, element) {
-            if (!AuthHelper.isAuthenticated()) {
-                AuthHelper.showLoginPrompt('add to wishlist');
-                return;
-            }
-            $.ajax({
-                url: '/user/wishlist/toggle',
-                type: 'POST',
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: JSON.stringify({
-                    productId: productId
-                }),
-                success: function(data) {
-                    if (data.success) {
-                        var icon = $(element).find('i');
-                        if (data.inWishlist) {
-                            icon.removeClass('fa-regular').addClass('fa-solid');
-                            $(element).attr('title', 'Remove from Wishlist');
-                        } else {
-                            icon.removeClass('fa-solid').addClass('fa-regular');
-                            $(element).attr('title', 'Add to Wishlist');
-                        }
-                        AuthHelper.updateWishlistCount(data.wishlistCount);
-                        AuthHelper.showToast(data.message, 'success');
-                    } else {
-                        AuthHelper.showToast(data.message || 'Error', 'danger');
-                    }
-                },
-                error: function() {
-                    AuthHelper.showToast('Something went wrong', 'danger');
-                }
-            });
-        }
-
-        // Submit Rating
-        function submitRating(productId, rating) {
-            if (!AuthHelper.isAuthenticated()) {
-                AuthHelper.showLoginPrompt('rate this product');
-                return;
-            }
-            $.ajax({
-                url: '/user/rating',
-                type: 'POST',
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: JSON.stringify({
-                    productId: productId,
-                    productRating: rating
-                }),
-                success: function(data) {
-                    if (data.success) {
-                        AuthHelper.showToast('Thanks for rating!', 'success');
-                        location.reload();
-                    } else if (data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
-                        AuthHelper.showToast(data.message || 'Error', 'danger');
-                    }
-                },
-                error: function() {
-                    AuthHelper.showToast('Something went wrong', 'danger');
-                }
-            });
-        }
-
-        // Submit Comment
-        function submitComment(form) {
-            if (!AuthHelper.isAuthenticated()) {
-                AuthHelper.showLoginPrompt('post a comment');
-                return;
-            }
-            var formData = new FormData(form);
-            $.ajax({
-                url: '/user/create/comment',
-                type: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(data) {
-                    if (data.success) {
-                        AuthHelper.showToast('Comment posted!', 'success');
-                        location.reload();
-                    } else if (data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
-                        AuthHelper.showToast(data.message || 'Error', 'danger');
-                    }
-                },
-                error: function() {
-                    AuthHelper.showToast('Something went wrong', 'danger');
-                }
-            });
-        }
-
-        // Initialize on page load
-        $(document).ready(function() {
-            // Auto-show toasts from session
-            $('.toast').each(function() {
-                var toast = new bootstrap.Toast(this, {
-                    delay: 3000
-                });
-                toast.show();
-            });
-        });
-    </script>
+    <script src="{{ asset('user/js/app.js') }}"></script>
 
     @yield('js-script')
 </body>

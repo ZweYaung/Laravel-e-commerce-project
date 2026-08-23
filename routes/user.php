@@ -6,44 +6,38 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\WishListController;
 use App\Http\Controllers\User\UserProfileController;
 
-// PUBLIC ROUTES - No middleware (Anyone can access)
-
-// Home & Static Pages
+// PUBLIC ROUTES
 Route::get('home', [UserController::class, 'home'])->name('user#home');
 Route::get('about', [UserController::class, "about"])->name("user#about");
 Route::get("contact", [UserController::class, "contact"])->name("user#contact");
 Route::post('contact', [UserController::class, 'createContact'])->name('user#createContact');
 
-// Shop - Browsing (PUBLIC)
 Route::group(["prefix" => "shop"], function() {
     Route::get("shop/{action?}", [ShopController::class, "shop"])->name("user#shop");
     Route::get("product/details/{id}", [ShopController::class, "productDetails"])->name("shop#productDetails");
 });
 
-// Cart View - Public (for guests too)
 Route::get("cart", [ShopController::class, "cart"])->name("user#cart");
 
-// GUEST CART ROUTES - No auth required
 Route::post("guest/cart/add", [ShopController::class, "addToGuestCart"])->name("guest#cartAdd");
 Route::delete("guest/cart/remove", [ShopController::class, "removeGuestCart"])->name("guest#cartRemove");
 Route::patch("guest/cart/update", [ShopController::class, "updateGuestCart"])->name("guest#cartUpdate");
 
-// PROTECTED ROUTES - userMiddleware (Requires login)
-
+// PROTECTED ROUTES
 Route::group(['middleware' => 'userMiddleware'], function() {
 
-    // Profile Management
+    // Profile
     Route::get('change/password', [UserProfileController::class, "changePasswordPage"])->name("user#changePasswordPage");
     Route::post("change/password", [UserProfileController::class, "changePassword"])->name("user#changePassword");
     Route::get('edit', [UserProfileController::class, "edit"])->name("user#editPage");
     Route::post('update', [UserProfileController::class, "update"])->name("user#update");
     Route::get("photo/remove", [UserProfileController::class, "removePhoto"])->name("user#removePhoto");
 
-    // Shop Actions (Rating, Comments)
+    // Shop actions
     Route::post("rating", [ShopController::class, "rating"])->name("user#rating");
     Route::post("create/comment", [ShopController::class, "createComment"])->name("create#comment");
 
-    // Cart Actions (Add, Remove, Checkout)
+    // Cart
     Route::post("add/cart", [ShopController::class, "addToCart"])->name("user#addToCart");
     Route::get("add/cart/{productId}", [ShopController::class, "addToCartGet"])->name("user#addToCartGet");
     Route::get("remove/cart", [ShopController::class, "cartRemove"])->name("user#removeCart");
@@ -59,6 +53,7 @@ Route::group(['middleware' => 'userMiddleware'], function() {
         Route::get("add/{id}", [WishListController::class, "addWishlist"])->name("wishlist#add");
         Route::get("remove/{id}", [WishListController::class, "removeWishlist"])->name("wishlist#remove");
         Route::post("toggle", [WishListController::class, "toggle"])->name("wishlist#toggle");
+        // NEW route for offcanvas refresh
+        Route::get("offcanvas-items", [WishListController::class, "offcanvasItems"])->name("wishlist.offcanvas");
     });
-
 });

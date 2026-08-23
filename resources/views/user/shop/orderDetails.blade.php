@@ -21,8 +21,6 @@
         </div>
 
         <!-- DataTales Example -->
-
-
         <div class="row">
             <div class="col-lg-8 table-responsive mb-5">
                 <table class="table text-center mb-0" id="productTable">
@@ -39,11 +37,6 @@
 
                         @foreach ($order as $item)
                             <tr>
-                                {{-- <td class="align-middle text-center">
-                                    <img src="{{ asset('productImage/' . $item->image) }}" alt="Product Image"
-                                        class="rounded"
-                                        style="width: 100px; height: 100px; object-fit: contain; border-radius: 8px;" />
-                                </td> --}}
                                 <td class="align-middle text-center">
                                     <img style="width: 100px; height: 100px; object-fit: contain;"
                                         src="{{ asset('productImage/' . $item->image) }}">

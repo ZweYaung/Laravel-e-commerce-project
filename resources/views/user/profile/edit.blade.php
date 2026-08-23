@@ -38,13 +38,13 @@
                         <div class="row">
                             <!-- Profile Image Column -->
                             <div class="col-12 col-lg-6 mb-4 mb-md-0 text-center">
-                                <img class="img-profile rounded mb-3" id="output"
+                                <img class="img-profile rounded mb-3" id="profileImagePreview"
                                     src="{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
                                     style="max-width: 250px; width: 80%; height: auto;">
 
                                 <div class="d-flex justify-content-center flex-wrap gap-2">
                                     <input type="file" accept="image/*" name="newImage" class="form-control w-auto"
-                                        onchange="loadFile(event)">
+                                        id="profileImageInput" onchange="previewProfileImage(event)">
                                     @if (Auth::user()->image)
                                         <a href="{{ route('user#removePhoto') }}"
                                             class="btn rounded btn-outline-danger">Remove Photo</a>
@@ -92,4 +92,24 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js-script')
+    <script>
+        function previewProfileImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('profileImagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                // Revert to original image if no file selected (e.g., user clears the input)
+                preview.src =
+                    "{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}";
+            }
+        }
+    </script>
 @endsection
