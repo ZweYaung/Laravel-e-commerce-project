@@ -302,7 +302,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <p class="mb-0">&copy; {{ date('Y') }} STYLEHUB. All rights reserved.</p>
-                        <p class="mb-0 small text-muted">Built with <i class="fa-solid fa-heart text-danger"></i> for
+                        <p class="mb-0 small text-muted">Built with <i class="fa-solid fa-heart text-dark"></i> for
                             fashion lovers everywhere.</p>
                     </div>
                 </div>
