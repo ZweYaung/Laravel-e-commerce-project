@@ -5,41 +5,39 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialLoginController extends Controller
 {
     private function saveURLImage()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if (!file_exists(public_path("profile_pic/" . $user->image))) {
-        if (filter_var($user->image, FILTER_VALIDATE_URL)) {
+        // Check if image file exists in the public storage disk
+        if (!Storage::disk('public')->exists("profile_pic/" . $user->image)) {
 
-            $imageContent = file_get_contents($user->image);
-            $directory = public_path('profile_pic');
+            // If the DB image is an external URL
+            if (filter_var($user->image, FILTER_VALIDATE_URL)) {
 
-            if (!File::exists($directory)) {
-                File::makeDirectory($directory, 0777, true, true);
-            } else {
-                // Force writable permissions if the folder exists with restricted permissions
-                @chmod($directory, 0777);
+                // Download image content
+                $imageContent = file_get_contents($user->image);
+
+                // Generate unique filename
+                $fileName = uniqid() . "_profilePic.jpg";
+
+                // Store using Laravel Storage facade (creates folder automatically with right permissions)
+                Storage::disk('public')->put("profile_pic/{$fileName}", $imageContent);
+
+                // Update database
+                $user->update(['image' => $fileName]);
             }
-
-            $fileName = uniqid() . "_profilePic.jpg";
-            $filePath = $directory . '/' . $fileName;
-
-            // Save file
-            file_put_contents($filePath, $imageContent);
-
-            $user->update(['image' => $fileName]);
         }
     }
-}
 
     // social login
-    public function redirect($provider){
+    public function redirect($provider)
+    {
         return Socialite::driver($provider)->redirect();
     }
 
