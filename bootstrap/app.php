@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies to handle SSL termination correctly
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'adminMiddleware' => AdminMiddleware::class,
             'userMiddleware' => UserMiddleware::class,
