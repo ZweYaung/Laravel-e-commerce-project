@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\Rating;
 use App\Models\Comment;
 use App\Models\Product;
-use App\Models\WishList;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
 use App\Models\PaymentHistory;
@@ -53,7 +53,7 @@ class ShopController extends Controller
         // Get wishlist items if user is logged in
         $wishlistItems = collect();
         if (auth()->check()) {
-            $wishlistItems = WishList::where('user_id', auth()->id())->with('product')->get();
+            $wishlistItems = Wishlist::where('user_id', auth()->id())->with('product')->get();
         }
 
         return view("user.shop.shop", compact("products", "action", "wishlistItems"));
@@ -112,7 +112,7 @@ class ShopController extends Controller
         // Get wishlist items if user is logged in
         $wishlistItems = collect();
         if (auth()->check()) {
-            $wishlistItems = WishList::where('user_id', auth()->id())->with('product')->get();
+            $wishlistItems = Wishlist::where('user_id', auth()->id())->with('product')->get();
         }
 
         return view("user.shop.productDetails", compact(
