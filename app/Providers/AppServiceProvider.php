@@ -25,20 +25,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Trust all proxies (Railway, etc.)
-    Request::setTrustedProxies(
-        ['*'],
-        Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO
-    );
+        // Trust all proxies (Sevalla, Railway, reverse proxies)
+        Request::setTrustedProxies(
+            ['*'],
+            Request::HEADER_X_FORWARDED_FOR |
+            Request::HEADER_X_FORWARDED_HOST |
+            Request::HEADER_X_FORWARDED_PORT |
+            Request::HEADER_X_FORWARDED_PROTO
+        );
 
-        if (env('APP_ENV') === 'production') {
-        URL::forceScheme('https');
+        // Force HTTPS if in production or behind an SSL-terminating proxy
+        if (config('app.env') === 'production' || request()->header('X-Forwarded-Proto') === 'https') {
+            URL::forceScheme('https');
         }
 
         Paginator::useBootstrap();
 
         // Share wishlist and cart data with all views
-         View::composer('*', function ($view) {
+        View::composer('*', function ($view) {
             if (auth()->check()) {
                 // Wishlist: full collection
                 $wishlistItems = Wishlist::with('product')
