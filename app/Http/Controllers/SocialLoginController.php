@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialLoginController extends Controller
@@ -15,23 +16,30 @@ class SocialLoginController extends Controller
         // Check if user image file does NOT exist locally
         if (!file_exists(public_path("profile_pic/" . $user->image))) {
 
-        // If the DB image is an external URL
-        if (filter_var($user->image, FILTER_VALIDATE_URL)) {
+            // If the DB image is an external URL
+            if (filter_var($user->image, FILTER_VALIDATE_URL)) {
 
-            // Download the image from URL
-            $imageContent = file_get_contents($user->image);
+                // Download the image from URL
+                $imageContent = file_get_contents($user->image);
 
-            // Create a unique filename
-            $fileName = uniqid() . "_profilePic.jpg";
+                // Define directory path
+                $directory = public_path('profile_pic');
 
-            // Save it to public/profile_pic folder
-            file_put_contents(public_path("profile_pic/" . $fileName), $imageContent);
+                // Create folder dynamically if it doesn't exist on server
+                if (!File::exists($directory)) {
+                    File::makeDirectory($directory, 0755, true, true);
+                }
 
-            // Update the DB with new filename
-            $user->update(['image' => $fileName]);
+                // Create a unique filename
+                $fileName = uniqid() . "_profilePic.jpg";
+
+                // Save it to public/profile_pic folder
+                file_put_contents($directory . '/' . $fileName, $imageContent);
+
+                // Update the DB with new filename
+                $user->update(['image' => $fileName]);
             }
         }
-
     }
 
     // social login
@@ -47,7 +55,6 @@ class SocialLoginController extends Controller
 
         $imageValue = $loginData->avatar;
         if ($existingUser && !filter_var($existingUser->image, FILTER_VALIDATE_URL)) {
-
             $imageValue = $existingUser->image;
         }
 
@@ -72,5 +79,4 @@ class SocialLoginController extends Controller
 
         return to_route('user#home');
     }
-
 }
