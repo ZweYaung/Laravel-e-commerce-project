@@ -39,7 +39,7 @@
                             <!-- Profile Image Column -->
                             <div class="col-12 col-lg-6 mb-4 mb-md-0 text-center">
                                 <img class="img-profile rounded mb-3" id="profileImagePreview"
-                                    src="{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                    src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
                                     style="max-width: 250px; width: 80%; height: auto;">
 
                                 <div class="d-flex justify-content-center flex-wrap gap-2">
