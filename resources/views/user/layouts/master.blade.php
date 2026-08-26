@@ -66,153 +66,159 @@
     </div>
 
     {{-- Navbar --}}
-    <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
-        <div class="container-fluid">
-            <div class="row justify-content-between align-items-center w-100">
-                <div class="col-auto">
-                    <h1 class="fs-4 text-center mt-4">STYLEHUB</h1>
+    <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+
+            <!-- 1. Brand Logo (Left) -->
+            <div class="col-auto">
+                <h1 class="fs-4 text-center mt-4">STYLEHUB</h1>
+            </div>
+
+            <!-- Mobile Toggler Button -->
+            <button class="navbar-toggler ms-auto me-2 d-lg-none" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- 2. Navigation Links / Offcanvas (Center) -->
+            <div class="offcanvas offcanvas-end flex-grow-1" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
                 </div>
-                <div class="col-auto">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
-                        aria-labelledby="offcanvasNavbarLabel">
-                        <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-                            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                aria-label="Close"></button>
-                        </div>
-                        <div class="offcanvas-body">
-                            <ul class="navbar-nav justify-content-end flex-grow-1 gap-1 gap-md-5 pe-3">
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('user#home') ? 'active fw-semi-bold' : '' }}"
-                                        href="{{ route('user#home') }}">Home</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('user#shop') ? 'active fw-semi-bold' : '' }}"
-                                        href="{{ route('user#shop') }}">Shop</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('user#about') ? 'active fw-semi-bold' : '' }}"
-                                        href="{{ route('user#about') }}">About Us</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('user#contact') ? 'active fw-semi-bold' : '' }}"
-                                        href="{{ route('user#contact') }}">Contact</a>
-                                </li>
-                                <li class="nav-item d-lg-none mt-2">
-                                    <a class="nav-link" href="{{ route('user#cart') }}">Cart <span class="cart-count">(
-                                            {{ $cartCount ?? 0 }} )</span></a>
-                                </li>
-                                <li class="nav-item d-lg-none">
-                                    <a class="nav-link" href="#" data-bs-toggle="offcanvas"
-                                        data-bs-target="#offcanvasCart">Wishlist <span class="wish-count">( @auth
-                                                {{ $wishlistItems->count() ?? 0 }}
-                                            @else
-                                            0 @endauth )</span></a>
-                                </li>
-                                @auth
-                                    <li class="nav-item dropdown d-lg-none">
-                                        <a class="dropdown-toggle nav-link" href="#" id="dropdownHomeMobile"
-                                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <img src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
-                                                class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
-                                                alt="Profile Picture">
-                                            <small>{{ Auth::user()->name ?? Auth::user()->nickname }}</small>
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownHomeMobile">
-                                            <li><a class="dropdown-item" href="{{ route('user#editPage') }}">Profile</a>
-                                            </li>
-                                            @if (Auth::user()->password)
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('user#changePasswordPage') }}">
-                                                        Change Password
-                                                    </a>
-                                                </li>
-                                            @endif
-                                            <li>
-                                                <a class="dropdown-item" href="{{ route('user#orderList') }}">
-                                                    Order List
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('logout') }}" method="post">
-                                                    @csrf
-                                                    <input type="submit" class="dropdown-item" value="LOGOUT">
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                @else
-                                    <li class="nav-item d-lg-none mt-2">
-                                        <a class="nav-link" href="{{ route('login') }}?redirect={{ url()->current() }}">
-                                            Login
-                                        </a>
-                                    </li>
-                                    <li class="nav-item d-lg-none">
-                                        <a class="nav-link" href="{{ route('register') }}">
-                                            Register
-                                        </a>
-                                    </li>
-                                @endauth
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-auto col-lg-auto">
-                    <ul class="list-unstyled d-flex m-0">
-                        <li class="d-none d-lg-block">
-                            <a href="{{ route('user#cart') }}" class="text-uppercase mx-3">Cart <span
-                                    class="cart-count">( <span id="cartCount">{{ $cartCount ?? 0 }}</span>
-                                    )</span></a>
+                <div class="offcanvas-body justify-content-center">
+                    <ul class="navbar-nav gap-1 gap-md-4">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('user#home') ? 'active fw-semi-bold' : '' }}"
+                                href="{{ route('user#home') }}">Home</a>
                         </li>
-                        <li class="d-none d-lg-block">
-                            <a href="#" class="text-uppercase mx-3" data-bs-toggle="offcanvas"
-                                data-bs-target="#offcanvasCart">Wishlist <span class="wish-count">( <span
-                                        id="wishlistCount">@auth {{ $wishlistItems->count() ?? 0 }}
-                                        @else
-                                        0 @endauth
-                                    </span> )</span></a>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('user#shop') ? 'active fw-semi-bold' : '' }}"
+                                href="{{ route('user#shop') }}">Shop</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('user#about') ? 'active fw-semi-bold' : '' }}"
+                                href="{{ route('user#about') }}">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('user#contact') ? 'active fw-semi-bold' : '' }}"
+                                href="{{ route('user#contact') }}">Contact</a>
+                        </li>
+                        <li class="nav-item d-lg-none mt-2">
+                            <a class="nav-link" href="{{ route('user#cart') }}">Cart <span class="cart-count">(
+                                    {{ $cartCount ?? 0 }} )</span></a>
+                        </li>
+                        <li class="nav-item d-lg-none">
+                            <a class="nav-link" href="#" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasCart">Wishlist <span class="wish-count">( @auth
+                                        {{ $wishlistItems->count() ?? 0 }}
+                                    @else
+                                    0 @endauth )</span></a>
                         </li>
                         @auth
-                            <li class="d-none d-lg-block dropdown">
-                                <a class="dropdown-toggle" href="#" id="dropdownHome" data-bs-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
+                            <li class="nav-item dropdown d-lg-none">
+                                <a class="dropdown-toggle nav-link" href="#" id="dropdownHomeMobile"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <img src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
-                                        class="img-profile rounded-circle" style="height: 28px; width: 28px"
+                                        class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
                                         alt="Profile Picture">
-                                    <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
+                                    <small>{{ Auth::user()->name ?? Auth::user()->nickname }}</small>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">
-                                    <li><a href="{{ route('user#editPage') }}"
-                                            class="dropdown-item item-anchor">Profile</a></li>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownHomeMobile">
+                                    <li><a class="dropdown-item" href="{{ route('user#editPage') }}">Profile</a></li>
                                     @if (Auth::user()->password)
-                                        <li><a href="{{ route('user#changePasswordPage') }}"
-                                                class="dropdown-item item-anchor">Change Password</a></li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('user#changePasswordPage') }}">
+                                                Change Password
+                                            </a>
+                                        </li>
                                     @endif
-                                    <li><a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
-                                            List</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('user#orderList') }}">
+                                            Order List
+                                        </a>
+                                    </li>
                                     <li>
                                         <form action="{{ route('logout') }}" method="post">
                                             @csrf
-                                            <input type="submit" class="dropdown-item item-anchor" value="LOGOUT">
+                                            <input type="submit" class="dropdown-item" value="LOGOUT">
                                         </form>
                                     </li>
                                 </ul>
                             </li>
                         @else
-                            <li class="d-none d-lg-block">
-                                <a href="{{ route('login') }}?redirect={{ url()->current() }}"
-                                    class="text-uppercase mx-3">Login</a>
-                                <a href="{{ route('register') }}" class="text-uppercase mx-3">Register</a>
+                            <li class="nav-item d-lg-none mt-2">
+                                <a class="nav-link" href="{{ route('login') }}?redirect={{ url()->current() }}">
+                                    Login
+                                </a>
+                            </li>
+                            <li class="nav-item d-lg-none">
+                                <a class="nav-link" href="{{ route('register') }}">
+                                    Register
+                                </a>
                             </li>
                         @endauth
                     </ul>
                 </div>
             </div>
+
+            <!-- 3. Right Actions (Cart, Wishlist, Profile - Desktop Only) -->
+            <div class="d-none d-lg-flex align-items-center ms-auto">
+                <ul class="list-unstyled d-flex m-0 align-items-center">
+                    <li>
+                        <a href="{{ route('user#cart') }}"
+                            class="text-uppercase mx-3 text-dark text-decoration-none">Cart <span class="cart-count">(
+                                <span id="cartCount">{{ $cartCount ?? 0 }}</span>
+                                )</span></a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-uppercase mx-3 text-dark text-decoration-none"
+                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">Wishlist <span
+                                class="wish-count">( <span id="wishlistCount">@auth
+                                        {{ $wishlistItems->count() ?? 0 }}
+                                    @else
+                                    0 @endauth
+                                </span> )</span></a>
+                    </li>
+                    @auth
+                        <li class="dropdown">
+                            <a class="dropdown-toggle text-dark text-decoration-none ms-2" href="#"
+                                id="dropdownHome" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                    class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
+                                    alt="Profile Picture">
+                                <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">
+                                <li><a href="{{ route('user#editPage') }}" class="dropdown-item item-anchor">Profile</a>
+                                </li>
+                                @if (Auth::user()->password)
+                                    <li><a href="{{ route('user#changePasswordPage') }}"
+                                            class="dropdown-item item-anchor">Change Password</a></li>
+                                @endif
+                                <li><a href="{{ route('user#orderList') }}" class="dropdown-item item-anchor">Order
+                                        List</a></li>
+                                <li>
+                                    <form action="{{ route('logout') }}" method="post">
+                                        @csrf
+                                        <input type="submit" class="dropdown-item item-anchor" value="LOGOUT">
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <li>
+                            <a href="{{ route('login') }}?redirect={{ url()->current() }}"
+                                class="text-uppercase mx-2 text-dark text-decoration-none">Login</a>
+                            <a href="{{ route('register') }}"
+                                class="text-uppercase mx-2 text-dark text-decoration-none">Register</a>
+                        </li>
+                    @endauth
+                </ul>
+            </div>
+
         </div>
     </nav>
 
