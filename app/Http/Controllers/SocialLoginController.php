@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -14,28 +15,26 @@ class SocialLoginController extends Controller
     {
         $user = Auth::user();
 
-        // Check if image file exists in the public storage disk
-        if (!Storage::disk('public')->exists("profile_pic/" . $user->image)) {
+        if (!$user || empty($user->image)) {
+            return;
+        }
 
-            // If the DB image is an external URL
-            if (filter_var($user->image, FILTER_VALIDATE_URL)) {
+        // Only process if the image field contains a valid external URL
+        if (filter_var($user->image, FILTER_VALIDATE_URL)) {
+            try {
+                $response = Http::timeout(5)->get($user->image);
 
-                // Download image content
-                $imageContent = file_get_contents($user->image);
-
-                // Generate unique filename
-                $fileName = uniqid() . "_profilePic.jpg";
-
-                // Store using Laravel Storage facade (creates folder automatically with right permissions)
-                Storage::disk('public')->put("profile_pic/{$fileName}", $imageContent);
-
-                // Update database
-                $user->update(['image' => $fileName]);
+                if ($response->successful()) {
+                    $fileName = uniqid() . '_profilePic.jpg';
+                    Storage::disk('public')->put("profile_pic/{$fileName}", $response->body());
+                    $user->update(['image' => $fileName]);
+                }
+            } catch (\Exception $e) {
+                // Optionally log the exception if download fails
             }
         }
     }
 
-    // social login
     public function redirect($provider)
     {
         return Socialite::driver($provider)->redirect();
@@ -47,22 +46,20 @@ class SocialLoginController extends Controller
 
         $existingUser = User::where('provider_id', $loginData->id)->first();
 
-        $imageValue = $loginData->avatar;
-        if ($existingUser && !filter_var($existingUser->image, FILTER_VALIDATE_URL)) {
-            $imageValue = $existingUser->image;
-        }
+        // Preserve existing user profile picture if one is already set
+        $imageValue = $existingUser && $existingUser->image
+            ? $existingUser->image
+            : $loginData->avatar;
 
-        // Create or update user
         $user = User::updateOrCreate(
             ['provider_id' => $loginData->id],
             [
-                'name' => $loginData->name,
-                'nickname' => $loginData->nickname,
-                'email' => $loginData->email,
-                'image' => $imageValue,
-                'role' => 'user',
-                'provider' => $provider,
-                'provider_id' => $loginData->id,
+                'name'           => $loginData->name ?? $loginData->nickname,
+                'nickname'       => $loginData->nickname,
+                'email'          => $loginData->email,
+                'image'          => $imageValue,
+                'role'           => 'user',
+                'provider'       => $provider,
                 'provider_token' => $loginData->token,
             ]
         );

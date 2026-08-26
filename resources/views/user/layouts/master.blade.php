@@ -117,9 +117,9 @@
                                     <li class="nav-item dropdown d-lg-none">
                                         <a class="dropdown-toggle nav-link" href="#" id="dropdownHomeMobile"
                                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <img src="{{ Auth::user()->image ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                            <img src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
                                                 class="img-profile rounded-circle me-1" style="height: 28px; width: 28px"
-                                                alt="">
+                                                alt="Profile Picture">
                                             <small>{{ Auth::user()->name ?? Auth::user()->nickname }}</small>
                                         </a>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownHomeMobile">
@@ -181,9 +181,9 @@
                             <li class="d-none d-lg-block dropdown">
                                 <a class="dropdown-toggle" href="#" id="dropdownHome" data-bs-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
-                                    <img src="{{ Auth::user()->image != null ? asset('profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
+                                    <img src="{{ Auth::user()->image ? asset('storage/profile_pic/' . Auth::user()->image) : asset('default/default_userImage.webp') }}"
                                         class="img-profile rounded-circle" style="height: 28px; width: 28px"
-                                        alt="">
+                                        alt="Profile Picture">
                                     <small>{{ Auth::user()->name ? Auth::user()->name : Auth::user()->nickname }}</small>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownHome">

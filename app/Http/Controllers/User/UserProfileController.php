@@ -2,111 +2,117 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
-    //direct to change password page
-    public function changePasswordPage(){
-        // dd("under construction");
+    public function changePasswordPage()
+    {
         return view("user.profile.changePassword");
     }
 
-    //change user password
-    public function changePassword(Request $request){
-        $dbPassword = Auth::user()->password;
+    public function changePassword(Request $request)
+    {
+        // 1. Always validate input first
+        $this->checkPasswordValidation($request);
 
-        if(Hash::check($request->currentPassword,$dbPassword)){
-            $this->checkPasswordValidation($request);
+        $user = Auth::user();
 
-            User::where('id',Auth::user()->id)->update([
-                'password' => Hash::make($request->newPassword)
-            ]);
-
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect('/');
-
-        }else{
-            if($request->currentPassword != null){
-                return back()->with('invalid-currentPassword','Invalid Password!');
-            }else{
-                $this->checkPasswordValidation($request);
-            }
+        // 2. Check current password match
+        if (!Hash::check($request->currentPassword, $user->password)) {
+            return back()->with('invalid-currentPassword', 'Invalid Password!');
         }
+
+        // 3. Update password and revoke session
+        User::where('id', $user->id)->update([
+            'password' => Hash::make($request->newPassword)
+        ]);
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 
-    //direct to profilePage
-    public function edit(){
+    public function edit()
+    {
         return view("user.profile.edit");
     }
 
-    //update user profile
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $this->checkProfileValidation($request);
         $data = $this->getUpdateData($request);
-        $currentImage = Auth::user()->image;
+        $user = Auth::user();
+        $currentImage = $user->image;
 
-        if($request->hasFile("newImage")){
-            if($currentImage != null){
-                if(file_exists(public_path("profile_pic/".$currentImage))){
-                    unlink(public_path("profile_pic/".$currentImage));
-                }
+        if ($request->hasFile('newImage')) {
+            // Delete existing stored file if available
+            if ($currentImage && Storage::disk('public')->exists("profile_pic/{$currentImage}")) {
+                Storage::disk('public')->delete("profile_pic/{$currentImage}");
             }
 
-            $fileName = uniqid().$request->file('newImage')->getClientOriginalName();
-            $request->file("newImage")->move(public_path()."/profile_pic/",$fileName);
-            $data['image'] = $fileName;
+            // Generate safe filename using hashName
+            $file = $request->file('newImage');
+            $fileName = uniqid() . '_' . $file->hashName();
+            $file->storeAs('profile_pic', $fileName, 'public');
 
-        }else{
+            $data['image'] = $fileName;
+        } else {
             $data['image'] = $currentImage;
         }
 
-        User::where('id',Auth::user()->id)->update($data);
-        return back()->with('update','Account information updated successfully!');
+        User::where('id', $user->id)->update($data);
+        return back()->with('update', 'Account information updated successfully!');
     }
 
-    //remove profile pic
     public function removePhoto()
     {
-        if(file_exists(public_path("profile_pic/".Auth::user()->image))){
-            unlink(public_path("profile_pic/".Auth::user()->image));
+        $user = Auth::user();
+        $currentImage = $user->image;
+
+        if ($currentImage && Storage::disk('public')->exists("profile_pic/{$currentImage}")) {
+            Storage::disk('public')->delete("profile_pic/{$currentImage}");
         }
 
-        User::where("id", Auth::id())->update(['image' => null]);
-        return back()->with('remove','Profile picture removed successfully!');
+        User::where('id', $user->id)->update(['image' => null]);
+        return back()->with('remove', 'Profile picture removed successfully!');
     }
 
-    //get profile update data
-    private function getUpdateData($request){
+    private function getUpdateData($request)
+    {
         return [
-            'name' => $request->name,
+            'name'  => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone
+            'phone' => $request->phone,
         ];
     }
 
-    //check profile validation
-    private function checkProfileValidation($request){
+    private function checkProfileValidation($request)
+    {
+        $userId = Auth::id();
+
         $request->validate([
-            'name' => 'required|unique:users,name,'.Auth::user()->id,
-            'email' => 'required',
-            'phone' => $request->phone != null ? 'numeric|digits_between:7,13' : ''
+            'name'     => ['required', 'string', 'max:255', Rule::unique('users', 'name')->ignore($userId)],
+            'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'phone'    => ['nullable', 'numeric', 'digits_between:7,13'],
+            'newImage' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
     }
 
-    //check password validation
-    private function checkPasswordValidation($request){
+    private function checkPasswordValidation($request)
+    {
         $request->validate([
-            'currentPassword' => 'required',
-            'newPassword' => 'required|min:8',
-            'confirmPassword' => 'required|same:newPassword'
+            'currentPassword' => ['required'],
+            'newPassword'     => ['required', 'min:8'],
+            'confirmPassword' => ['required', 'same:newPassword'],
         ]);
     }
 }
